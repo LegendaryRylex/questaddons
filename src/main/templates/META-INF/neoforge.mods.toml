@@ -2,12 +2,16 @@ modLoader="javafml"
 loaderVersion="${loader_version_range}"
 license="${mod_license}"
 
+[[mixins]]
+config="${mod_id}.mixins.json"
+
 [[mods]]
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 authors="${mod_authors}"
 description='''${mod_description}'''
+displayTest="IGNORE_ALL_VERSION"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
@@ -22,3 +26,10 @@ type="required"
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="ftbquests"
+type="required"
+versionRange="${ftb_quests_version_range}"
+ordering="AFTER"
+side="CLIENT"
