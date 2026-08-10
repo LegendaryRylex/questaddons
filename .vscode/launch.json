@@ -12,13 +12,13 @@
       "projectName": "questboxselect",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\build\\moddev\\clientRunProgramArgs.txt"
+        "@E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\build\\moddev\\clientRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\build\\moddev\\clientRunVmArgs.txt",
-        "-Dfml.modFolders\u003dquestboxselect%%E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\bin\\main"
+        "@E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\build\\moddev\\clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dquestboxselect%%E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\bin\\main"
       ],
-      "cwd": "${workspaceFolder}\\run",
+      "cwd": "${workspaceFolder}\\runs\\client",
       "env": {},
       "console": "internalConsole",
       "shortenCommandLine": "none"
@@ -34,13 +34,13 @@
       "projectName": "questboxselect",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\build\\moddev\\dataRunProgramArgs.txt"
+        "@E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\build\\moddev\\dataRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\build\\moddev\\dataRunVmArgs.txt",
-        "-Dfml.modFolders\u003dquestboxselect%%E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\bin\\main"
+        "@E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\build\\moddev\\dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dquestboxselect%%E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\bin\\main"
       ],
-      "cwd": "${workspaceFolder}\\run",
+      "cwd": "${workspaceFolder}\\runs\\data",
       "env": {},
       "console": "internalConsole",
       "shortenCommandLine": "none"
@@ -56,13 +56,13 @@
       "projectName": "questboxselect",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\build\\moddev\\gameTestServerRunProgramArgs.txt"
+        "@E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\build\\moddev\\gameTestServerRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\build\\moddev\\gameTestServerRunVmArgs.txt",
-        "-Dfml.modFolders\u003dquestboxselect%%E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\bin\\main"
+        "@E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\build\\moddev\\gameTestServerRunVmArgs.txt",
+        "-Dfml.modFolders\u003dquestboxselect%%E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\bin\\main"
       ],
-      "cwd": "${workspaceFolder}\\run",
+      "cwd": "${workspaceFolder}\\runs\\gameTestServer",
       "env": {},
       "console": "internalConsole",
       "shortenCommandLine": "none"
@@ -78,13 +78,13 @@
       "projectName": "questboxselect",
       "mainClass": "net.neoforged.devlaunch.Main",
       "args": [
-        "@E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\build\\moddev\\serverRunProgramArgs.txt"
+        "@E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\build\\moddev\\serverRunProgramArgs.txt"
       ],
       "vmArgs": [
-        "@E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\build\\moddev\\serverRunVmArgs.txt",
-        "-Dfml.modFolders\u003dquestboxselect%%E:\\Minecraft\\Personal\\tools\\templates\\neoforge-1.21.1\\bin\\main"
+        "@E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\build\\moddev\\serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dquestboxselect%%E:\\Minecraft\\Personal\\Mods\\1.21.1\\questboxselect\\bin\\main"
       ],
-      "cwd": "${workspaceFolder}\\run",
+      "cwd": "${workspaceFolder}\\runs\\server",
       "env": {},
       "console": "internalConsole",
       "shortenCommandLine": "none"

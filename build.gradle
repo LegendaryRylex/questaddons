@@ -24,6 +24,14 @@ repositories {
         url = 'https://www.cursemaven.com'
         content { includeGroup 'curse.maven' }
     }
+    maven {
+        url = 'https://maven.ftb.dev/releases'
+        content { includeGroup 'dev.ftb.mods' }
+    }
+    maven {
+        url = 'https://maven.architectury.dev/'
+        content { includeGroup 'dev.architectury' }
+    }
 }
 
 neoForge {
@@ -59,6 +67,8 @@ neoForge {
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
+            gameDirectory = file("runs/$name")
+            jvmArguments.addAll '-Xmx4G'
         }
     }
 
@@ -76,8 +86,13 @@ configurations {
 }
 
 dependencies {
-    localRuntime "curse.maven:architectury-api-419699:8492726"
-    localRuntime "curse.maven:tool-kit-324888:8216546"
+    compileOnly "dev.ftb.mods:ftb-quests-neoforge:${ftb_quests_version}"
+    compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+
+    localRuntime "dev.architectury:architectury-neoforge:${architectury_version}"
+    localRuntime "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+    localRuntime "dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}"
+    localRuntime "dev.ftb.mods:ftb-quests-neoforge:${ftb_quests_version}"
 
     testImplementation platform('org.junit:junit-bom:5.14.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -111,7 +126,8 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_license            : mod_license,
             mod_version            : mod_version,
             mod_authors            : mod_authors,
-            mod_description        : mod_description
+            mod_description        : mod_description,
+            ftb_quests_version_range: ftb_quests_version_range
     ]
     inputs.properties replaceProperties
     expand replaceProperties
