@@ -1,0 +1,42 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mixins]]
+config="questaddons.mixins.json"
+
+[[mods]]
+modId="questaddons"
+version="0.1.0-dev.20260824-nogit"
+displayName="Quest Addons"
+authors="Rylex"
+description='''Editor conveniences for FTB Quests.'''
+displayTest="IGNORE_ALL_VERSION"
+
+[[dependencies.questaddons]]
+modId="neoforge"
+type="required"
+versionRange="[26.1.2.71,26.2)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.questaddons]]
+modId="minecraft"
+type="required"
+versionRange="[26.1,27)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.questaddons]]
+modId="ftbquests"
+type="required"
+versionRange="[26.1.2.6,27)"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.questaddons]]
+modId="ftbfiltersystem"
+type="optional"
+versionRange="[0,)"
+ordering="NONE"
+side="CLIENT"

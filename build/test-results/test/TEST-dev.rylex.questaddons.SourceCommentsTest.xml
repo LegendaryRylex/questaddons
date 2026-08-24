@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.rylex.questaddons.SourceCommentsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-08-24T20:14:54.835Z" hostname="DESKTOP-87N1FT4" time="0.008">
+  <properties/>
+  <testcase name="sourceCarriesNoCommentsBeyondJavadocOnDeclarations()" classname="dev.rylex.questaddons.SourceCommentsTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

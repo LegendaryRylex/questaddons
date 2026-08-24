@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "dev.rylex.questaddons.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ChapterImageButtonMixin",
+    "KeyMixin",
+    "QuestButtonMixin",
+    "QuestPanelMixin",
+    "QuestScreenAccessor",
+    "QuestScreenFilterMixin",
+    "QuestScreenMixin",
+    "ViewQuestPanelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
