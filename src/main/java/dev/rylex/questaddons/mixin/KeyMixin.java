@@ -1,4 +1,4 @@
-package dev.rylex.questboxselect.mixin;
+package dev.rylex.questaddons.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
@@ -13,7 +13,7 @@ public abstract class KeyMixin {
     public abstract boolean is(int k);
 
     @ModifyReturnValue(method = "enter", at = @At("RETURN"))
-    private boolean questboxselect$numpadEnterCountsAsEnter(boolean original) {
+    private boolean questaddons$numpadEnterCountsAsEnter(boolean original) {
         return original || is(GLFW.GLFW_KEY_KP_ENTER);
     }
 }

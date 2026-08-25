@@ -1,0 +1,15 @@
+{
+  "key.categories.questaddons": "Quest Addons",
+  "key.questaddons.box_select": "Box Select (hold + drag)",
+  "key.questaddons.move_selection": "Move Selection (hold + click a selected quest)",
+  "key.questaddons.instant_complete": "Complete Instantly (hold + click a quest)",
+  "key.questaddons.reset_progress": "Reset Progress (hold + click a quest)",
+  "key.questaddons.delete_object": "Delete (hold + click a quest or image)",
+  "key.questaddons.quest_filter": "Smart Filter From Quest Items",
+  "questaddons.smart_filter.given": "Smart Filter",
+  "questaddons.smart_filter.given_detail": "Matches any of %s items",
+  "questaddons.smart_filter.no_items": "This quest has no item tasks",
+  "questaddons.smart_filter.creative_only": "Creative mode is needed to make a Smart Filter",
+  "questaddons.smart_filter.inventory_full": "No free inventory slot for the Smart Filter",
+  "questaddons.smart_filter.mod_missing": "FTB Filter System is not installed"
+}

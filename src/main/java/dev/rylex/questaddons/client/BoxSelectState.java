@@ -1,4 +1,4 @@
-package dev.rylex.questboxselect.client;
+package dev.rylex.questaddons.client;
 
 public final class BoxSelectState {
     public static boolean active;

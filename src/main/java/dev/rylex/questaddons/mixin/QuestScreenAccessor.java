@@ -1,4 +1,4 @@
-package dev.rylex.questboxselect.mixin;
+package dev.rylex.questaddons.mixin;
 
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -11,20 +11,23 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(value = QuestScreen.class, remap = false)
 public interface QuestScreenAccessor {
     @Accessor("grabbed")
-    MouseButton questboxselect$grabbed();
+    MouseButton questaddons$grabbed();
 
     @Accessor("prevMouseX")
-    int questboxselect$prevMouseX();
+    int questaddons$prevMouseX();
 
     @Accessor("prevMouseY")
-    int questboxselect$prevMouseY();
+    int questaddons$prevMouseY();
 
     @Accessor("selectedObjects")
-    List<Movable> questboxselect$selectedObjects();
+    List<Movable> questaddons$selectedObjects();
 
     @Accessor("movingObjects")
-    void questboxselect$setMovingObjects(boolean movingObjects);
+    boolean questaddons$movingObjects();
+
+    @Accessor("movingObjects")
+    void questaddons$setMovingObjects(boolean movingObjects);
 
     @Invoker("selectAllQuestsInBox")
-    void questboxselect$selectAllQuestsInBox(int mouseX, int mouseY, double scrollX, double scrollY);
+    void questaddons$selectAllQuestsInBox(int mouseX, int mouseY, double scrollX, double scrollY);
 }

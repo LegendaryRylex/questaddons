@@ -19,3 +19,6 @@ repo/
 .settings/
 .metadata
 *.launch
+
+.vscode/
+.editorconfig
