@@ -1,6 +1,6 @@
 package dev.rylex.questaddons.mixin;
 
-import dev.ftb.mods.ftblibrary.ui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.rylex.questaddons.client.ClickGestureGuard;

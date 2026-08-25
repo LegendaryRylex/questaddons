@@ -1,14 +1,15 @@
 package dev.rylex.questaddons.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.rylex.questaddons.client.BoxSelectState;
 import dev.rylex.questaddons.client.GridSnap;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,14 +20,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class QuestScreenMixin {
     @ModifyExpressionValue(
             method = "drawBackground",
-            at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/input/MouseButton;isLeft()Z"))
+            at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/client/gui/input/MouseButton;isLeft()Z"))
     private boolean questaddons$suppressPan(boolean original) {
         return original && !BoxSelectState.active;
     }
 
     @Inject(method = "drawBackground", at = @At("TAIL"))
     private void questaddons$drawSelectionBox(
-            GuiGraphics graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
+            GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
         QuestScreenAccessor accessor = (QuestScreenAccessor) this;
         if (accessor.questaddons$grabbed() == null) {
             BoxSelectState.active = false;
@@ -48,7 +49,7 @@ public abstract class QuestScreenMixin {
         int boxH = Math.abs(mouseY - prevY);
 
         GuiHelper.drawHollowRect(graphics, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
-        Color4I.DARK_GRAY.withAlpha(40).draw(graphics, boxX, boxY, boxW, boxH);
+        IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(40), graphics, boxX, boxY, boxW, boxH);
     }
 
     @ModifyVariable(method = "getSnappedXY", at = @At("STORE"), name = "snap")

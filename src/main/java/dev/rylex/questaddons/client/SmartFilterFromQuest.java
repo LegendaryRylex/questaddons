@@ -14,7 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -33,11 +33,11 @@ public final class SmartFilterFromQuest {
         if (!FilterSystemCompat.isLoaded()) {
             return failed("questaddons.smart_filter.mod_missing");
         }
-        if (!minecraft.gameMode.hasInfiniteItems()) {
+        if (!minecraft.gameMode.getPlayerMode().isCreative()) {
             return failed("questaddons.smart_filter.creative_only");
         }
 
-        Set<ResourceLocation> itemIds = taskItemIds(quest);
+        Set<Identifier> itemIds = taskItemIds(quest);
         Optional<ItemStack> filter = FilterSystemCompat.orFilterOf(itemIds);
         if (filter.isEmpty()) {
             return failed("questaddons.smart_filter.no_items");
@@ -55,16 +55,16 @@ public final class SmartFilterFromQuest {
                 stack, Inventory.isHotbarSlot(slot) ? slot + MENU_HOTBAR_OFFSET : slot);
 
         minecraft
-                .getToasts()
+                .getToastManager()
                 .addToast(new CustomToast(
                         Component.translatable("questaddons.smart_filter.given"),
-                        ItemIcon.getItemIcon(stack),
+                        ItemIcon.ofItemStack(stack),
                         Component.translatable("questaddons.smart_filter.given_detail", itemIds.size())));
         return true;
     }
 
-    private static Set<ResourceLocation> taskItemIds(Quest quest) {
-        Set<ResourceLocation> itemIds = new LinkedHashSet<>();
+    private static Set<Identifier> taskItemIds(Quest quest) {
+        Set<Identifier> itemIds = new LinkedHashSet<>();
         for (Task task : quest.getTasks()) {
             if (task instanceof ItemTask itemTask) {
                 for (ItemStack stack : itemTask.getValidDisplayItems()) {

@@ -1,8 +1,9 @@
 package dev.rylex.questaddons.mixin;
 
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestButton;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
@@ -46,14 +47,15 @@ public abstract class QuestButtonMixin {
             return;
         }
 
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        ClientQuestFile file = ClientQuestFile.getInstance();
         if (file == null || !file.canEdit()) {
             return;
         }
 
         ((Widget) (Object) this).playClickSound();
         ClickGestureGuard.arm(reset ? QuestAddonsKeys.RESET_PROGRESS : QuestAddonsKeys.INSTANT_COMPLETE);
-        ChangeProgressMessage.sendToServer(file.selfTeamData, quest, progressChange -> progressChange.setReset(reset));
+        ChangeProgressMessage.sendToServer(
+                FTBQuestsClient.getClientPlayerData(), quest, progressChange -> progressChange.setReset(reset));
         ci.cancel();
     }
 
@@ -63,7 +65,7 @@ public abstract class QuestButtonMixin {
             return;
         }
 
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        ClientQuestFile file = ClientQuestFile.getInstance();
         if (file == null || !file.canEdit()) {
             return;
         }
@@ -80,7 +82,7 @@ public abstract class QuestButtonMixin {
             return;
         }
 
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        ClientQuestFile file = ClientQuestFile.getInstance();
         if (file == null || !file.canEdit()) {
             return;
         }

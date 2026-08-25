@@ -10,7 +10,7 @@ An open quest can also be turned straight into an FTB Filter System smart filter
 
 Client-side only. Nothing is required on the server, and the quest file is never modified.
 
-NeoForge mod for Minecraft 1.21.1. Requires FTB Quests.
+NeoForge mod for Minecraft 26.1.2. Requires FTB Quests.
 
 ## Building
 

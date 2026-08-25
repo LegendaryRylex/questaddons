@@ -1,6 +1,7 @@
 package dev.rylex.questaddons;
 
 import dev.rylex.questaddons.client.QuestAddonsKeys;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -14,5 +15,9 @@ public final class QuestAddons {
         if (dist.isClient()) {
             QuestAddonsKeys.init(modBus);
         }
+    }
+
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 }

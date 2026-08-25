@@ -1,7 +1,7 @@
 package dev.rylex.questaddons.mixin;
 
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestPanel;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -32,7 +32,7 @@ public abstract class QuestPanelMixin {
         if (accessor.questaddons$grabbed() != button || accessor.questaddons$movingObjects()) {
             return;
         }
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        ClientQuestFile file = ClientQuestFile.getInstance();
         BoxSelectState.active = file != null && file.canEdit();
     }
 

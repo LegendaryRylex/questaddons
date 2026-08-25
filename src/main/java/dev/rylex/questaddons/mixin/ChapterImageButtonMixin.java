@@ -1,8 +1,8 @@
 package dev.rylex.questaddons.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.ChapterImageButton;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -33,11 +33,11 @@ public abstract class ChapterImageButtonMixin {
 
     @Inject(method = "onClicked", at = @At("HEAD"), cancellable = true)
     private void questaddons$grabSelection(MouseButton button, CallbackInfo ci) {
-        if (!button.isLeft() || !QuestAddonsKeys.isMoveSelectionHeld() || chapterImage.isPositionLocked()) {
+        if (!button.isLeft() || !QuestAddonsKeys.isMoveSelectionHeld()) {
             return;
         }
 
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        ClientQuestFile file = ClientQuestFile.getInstance();
         if (file == null || !file.canEdit()) {
             return;
         }
@@ -60,7 +60,7 @@ public abstract class ChapterImageButtonMixin {
             return;
         }
 
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        ClientQuestFile file = ClientQuestFile.getInstance();
         if (file == null || !file.canEdit()) {
             return;
         }

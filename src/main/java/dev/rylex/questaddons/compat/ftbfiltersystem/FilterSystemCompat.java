@@ -4,15 +4,15 @@ import java.util.Collection;
 import java.util.Optional;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
 
 public final class FilterSystemCompat {
     public static final String MOD_ID = "ftbfiltersystem";
 
-    private static final ResourceLocation SMART_FILTER = ResourceLocation.fromNamespaceAndPath(MOD_ID, "smart_filter");
-    private static final ResourceLocation FILTER_STRING = ResourceLocation.fromNamespaceAndPath(MOD_ID, "filter");
+    private static final Identifier SMART_FILTER = Identifier.fromNamespaceAndPath(MOD_ID, "smart_filter");
+    private static final Identifier FILTER_STRING = Identifier.fromNamespaceAndPath(MOD_ID, "filter");
 
     private FilterSystemCompat() {}
 
@@ -20,22 +20,22 @@ public final class FilterSystemCompat {
         return ModList.get().isLoaded(MOD_ID);
     }
 
-    public static Optional<ItemStack> orFilterOf(Collection<ResourceLocation> itemIds) {
+    public static Optional<ItemStack> orFilterOf(Collection<Identifier> itemIds) {
         if (itemIds.isEmpty()
                 || !BuiltInRegistries.ITEM.containsKey(SMART_FILTER)
                 || !BuiltInRegistries.DATA_COMPONENT_TYPE.containsKey(FILTER_STRING)) {
             return Optional.empty();
         }
 
-        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(SMART_FILTER));
+        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(SMART_FILTER));
         stack.set(
                 filterComponent(),
-                FilterSyntax.or(itemIds.stream().map(ResourceLocation::toString).toList()));
+                FilterSyntax.or(itemIds.stream().map(Identifier::toString).toList()));
         return Optional.of(stack);
     }
 
     @SuppressWarnings("unchecked")
     private static DataComponentType<String> filterComponent() {
-        return (DataComponentType<String>) BuiltInRegistries.DATA_COMPONENT_TYPE.get(FILTER_STRING);
+        return (DataComponentType<String>) BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(FILTER_STRING);
     }
 }
