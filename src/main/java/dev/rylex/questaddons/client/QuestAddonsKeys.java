@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Window;
 import dev.rylex.questaddons.QuestAddons;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
@@ -103,6 +104,11 @@ public final class QuestAddonsKeys {
 
     public static boolean isDeleteObjectHeld() {
         return isHeld(DELETE_OBJECT);
+    }
+
+    public static boolean matches(KeyMapping mapping, KeyEvent keyEvent) {
+        InputConstants.Key key = mapping.getKey();
+        return key.getValue() != InputConstants.UNKNOWN.getValue() && key.equals(InputConstants.getKey(keyEvent));
     }
 
     private static boolean isHeld(KeyMapping mapping) {
