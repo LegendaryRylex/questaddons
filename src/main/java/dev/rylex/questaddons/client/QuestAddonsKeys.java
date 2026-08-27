@@ -96,6 +96,12 @@ public final class QuestAddonsKeys {
         return isHeld(DELETE_OBJECT);
     }
 
+    public static boolean matches(KeyMapping mapping, int keyCode, int scanCode) {
+        InputConstants.Key key = mapping.getKey();
+        return key.getValue() != InputConstants.UNKNOWN.getValue()
+                && key.equals(InputConstants.getKey(keyCode, scanCode));
+    }
+
     private static boolean isHeld(KeyMapping mapping) {
         InputConstants.Key key = mapping.getKey();
         if (key.getValue() == InputConstants.UNKNOWN.getValue()) {

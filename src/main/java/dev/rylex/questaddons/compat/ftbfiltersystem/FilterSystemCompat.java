@@ -20,6 +20,10 @@ public final class FilterSystemCompat {
         return ModList.get().isLoaded(MOD_ID);
     }
 
+    public static boolean isSmartFilter(ItemStack stack) {
+        return BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(SMART_FILTER);
+    }
+
     public static Optional<ItemStack> orFilterOf(Collection<ResourceLocation> itemIds) {
         if (itemIds.isEmpty()
                 || !BuiltInRegistries.ITEM.containsKey(SMART_FILTER)
