@@ -6,6 +6,7 @@
   "key.questaddons.keys.reset_progress": "Reset Progress (hold + click a quest)",
   "key.questaddons.keys.delete_object": "Delete (hold + click a quest or image)",
   "key.questaddons.keys.quest_filter": "Smart Filter From Quest Items",
+  "key.questaddons.keys.save_quests": "Save Quests on Server (hold Shift to download the quest files instead)",
   "questaddons.smart_filter.given": "Smart Filter",
   "questaddons.smart_filter.given_detail": "Matches any of %s items",
   "questaddons.smart_filter.no_items": "This quest has no item tasks",

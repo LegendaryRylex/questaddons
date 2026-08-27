@@ -62,6 +62,14 @@ public final class QuestAddonsKeys {
             GLFW.GLFW_KEY_KP_ADD,
             CATEGORY);
 
+    public static final KeyMapping SAVE_QUESTS = new KeyMapping(
+            "key.questaddons.keys.save_quests",
+            KeyConflictContext.GUI,
+            KeyModifier.CONTROL,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_S,
+            CATEGORY);
+
     private QuestAddonsKeys() {}
 
     public static void init(IEventBus modBus) {
@@ -73,6 +81,7 @@ public final class QuestAddonsKeys {
             event.register(RESET_PROGRESS);
             event.register(DELETE_OBJECT);
             event.register(QUEST_FILTER);
+            event.register(SAVE_QUESTS);
         });
     }
 
