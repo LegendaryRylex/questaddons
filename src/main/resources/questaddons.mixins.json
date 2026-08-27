@@ -11,6 +11,7 @@
     "QuestScreenAccessor",
     "QuestScreenFilterMixin",
     "QuestScreenMixin",
+    "QuestScreenSaveMixin",
     "QuestScreenSelectionMixin",
     "ViewQuestPanelMixin"
   ],
