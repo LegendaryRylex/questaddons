@@ -21,22 +21,24 @@ public abstract class QuestScreenMixin {
             method = "drawBackground",
             at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/input/MouseButton;isLeft()Z"))
     private boolean questaddons$suppressPan(boolean original) {
-        return original && !BoxSelectState.active;
+        return original && !BoxSelectState.isActive((BaseScreen) (Object) this);
     }
 
     @Inject(method = "drawBackground", at = @At("TAIL"))
     private void questaddons$drawSelectionBox(
             GuiGraphics graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
         QuestScreenAccessor accessor = (QuestScreenAccessor) this;
+        BaseScreen self = (BaseScreen) (Object) this;
         if (accessor.questaddons$grabbed() == null) {
-            BoxSelectState.active = false;
+            if (BoxSelectState.isActive(self)) {
+                BoxSelectState.end();
+            }
             return;
         }
-        if (!BoxSelectState.active) {
+        if (!BoxSelectState.isActive(self)) {
             return;
         }
 
-        BaseScreen self = (BaseScreen) (Object) this;
         int mouseX = self.getMouseX();
         int mouseY = self.getMouseY();
         int prevX = accessor.questaddons$prevMouseX();

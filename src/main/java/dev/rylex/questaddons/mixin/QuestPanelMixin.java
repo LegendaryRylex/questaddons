@@ -1,5 +1,6 @@
 package dev.rylex.questaddons.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
@@ -8,6 +9,7 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.rylex.questaddons.client.BoxSelectState;
 import dev.rylex.questaddons.client.GridSnap;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,20 +35,44 @@ public abstract class QuestPanelMixin {
             return;
         }
         ClientQuestFile file = ClientQuestFile.INSTANCE;
-        BoxSelectState.active = file != null && file.canEdit();
+        if (file != null && file.canEdit()) {
+            BoxSelectState.begin(questScreen);
+        }
     }
 
     @Inject(method = "mouseReleased", at = @At("RETURN"))
     private void questaddons$endBoxSelect(MouseButton button, CallbackInfo ci) {
-        if (!BoxSelectState.active || !button.isLeft()) {
+        if (!BoxSelectState.isActive(questScreen) || !button.isLeft()) {
             return;
         }
-        BoxSelectState.active = false;
+        BoxSelectState.end();
 
         Panel self = (Panel) (Object) this;
         ((QuestScreenAccessor) questScreen)
                 .questaddons$selectAllQuestsInBox(
                         self.getMouseX(), self.getMouseY(), self.getScrollX(), self.getScrollY());
+    }
+
+    @ModifyExpressionValue(
+            method = "draw",
+            at =
+                    @At(
+                            value = "FIELD",
+                            target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;width:I",
+                            opcode = Opcodes.GETFIELD))
+    private int questaddons$centreOnOwningScreenX(int original) {
+        return original + 2 * questScreen.getX();
+    }
+
+    @ModifyExpressionValue(
+            method = "draw",
+            at =
+                    @At(
+                            value = "FIELD",
+                            target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;height:I",
+                            opcode = Opcodes.GETFIELD))
+    private int questaddons$centreOnOwningScreenY(int original) {
+        return original + 2 * questScreen.getY();
     }
 
     @ModifyVariable(method = "draw", at = @At("STORE"), name = "snap")

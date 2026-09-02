@@ -4,7 +4,9 @@
   "package": "dev.rylex.questaddons.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "BaseScreenSplitMixin",
     "ChapterImageButtonMixin",
+    "ChapterPanelMixin",
     "KeyMixin",
     "QuestButtonMixin",
     "QuestPanelMixin",
@@ -13,6 +15,8 @@
     "QuestScreenMixin",
     "QuestScreenSaveMixin",
     "QuestScreenSelectionMixin",
+    "QuestScreenSplitMixin",
+    "ScreenWrapperSplitMixin",
     "ViewQuestPanelMixin"
   ],
   "injectors": {

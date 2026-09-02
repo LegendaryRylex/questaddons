@@ -7,6 +7,8 @@
   "key.questaddons.delete_object": "Delete (hold + click a quest or image)",
   "key.questaddons.quest_filter": "Smart Filter From Quest Items (in your inventory, from the hotbar, or the whole inventory with Shift)",
   "key.questaddons.save_quests": "Save Quests on Server (hold Shift to download the quest files instead)",
+  "key.questaddons.split_view": "Split View (two chapters side by side)",
+  "key.questaddons.split_view_stacked": "Split View Stacked (two chapters one above the other)",
   "questaddons.smart_filter.given": "Smart Filter",
   "questaddons.smart_filter.given_detail": "Matches any of %s items",
   "questaddons.smart_filter.no_items": "This quest has no item tasks",
