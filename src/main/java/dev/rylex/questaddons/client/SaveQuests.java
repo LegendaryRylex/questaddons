@@ -1,5 +1,6 @@
 package dev.rylex.questaddons.client;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
 import java.io.File;
@@ -10,7 +11,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ public final class SaveQuests {
             return false;
         }
 
-        PacketDistributor.sendToServer(ForceSaveMessage.INSTANCE);
+        NetworkManager.sendToServer(ForceSaveMessage.INSTANCE);
         return true;
     }
 

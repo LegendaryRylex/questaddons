@@ -2,6 +2,7 @@ package dev.rylex.questaddons.client;
 
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
+import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.KeyModifiers;
@@ -14,6 +15,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.rylex.questaddons.mixin.QuestScreenAccessor;
 import java.util.List;
+import java.util.function.Consumer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -80,6 +82,14 @@ public final class SplitView {
         draggingDivider = false;
     }
 
+    public static void detach(QuestScreen screen) {
+        if (root == screen) {
+            root = null;
+            paneFocused = false;
+            draggingDivider = false;
+        }
+    }
+
     private static void open(QuestScreen screen) {
         ClientQuestFile file = ClientQuestFile.INSTANCE;
         if (file == null) {
@@ -87,24 +97,27 @@ public final class SplitView {
         }
 
         SplitViewPane created = new SplitViewPane(file);
-        root = screen;
         pane = created;
-        paneFocused = false;
-        draggingDivider = false;
+        attach(screen, created);
 
-        applyPaneBounds(created, screen);
-        created.initGui();
-
-        Chapter chapter = otherChapter(file, ((QuestScreenAccessor) screen).questaddons$selectedChapter());
+        Chapter chapter = otherChapter(file, selectedChapter(screen));
         if (chapter != null) {
             created.selectChapter(chapter);
         }
     }
 
+    /**
+     * FTB Library runs onClosed for any screen shown over the book and refreshGui replaces the
+     * QuestScreen outright, so the pane re-attaches to whichever QuestScreen initialises next.
+     */
     public static void applyRootBounds(QuestScreen screen) {
         SplitViewPane current = pane;
-        if (current == null || root != screen) {
+        if (current == null || screen instanceof SplitViewPane) {
             return;
+        }
+
+        if (root != screen) {
+            current = adopt(screen, current);
         }
 
         if (orientation == SplitOrientation.SIDE_BY_SIDE) {
@@ -114,6 +127,41 @@ public final class SplitView {
         }
 
         applyPaneBounds(current, screen);
+    }
+
+    private static SplitViewPane adopt(QuestScreen screen, SplitViewPane current) {
+        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        if (file != null && !current.isBackedBy(file)) {
+            current = rebuild(current, file);
+            pane = current;
+        }
+
+        attach(screen, current);
+        return current;
+    }
+
+    private static void attach(QuestScreen screen, SplitViewPane target) {
+        root = screen;
+        paneFocused = false;
+        draggingDivider = false;
+        applyPaneBounds(target, screen);
+        target.initGui();
+    }
+
+    private static SplitViewPane rebuild(SplitViewPane previous, ClientQuestFile file) {
+        SplitViewPane created = new SplitViewPane(file);
+        Chapter shown = selectedChapter(previous);
+        Chapter chapter = shown == null ? null : file.getChapter(shown.id);
+        if (chapter != null) {
+            created.selectChapter(chapter);
+        }
+
+        return created;
+    }
+
+    @Nullable
+    private static Chapter selectedChapter(QuestScreen screen) {
+        return ((QuestScreenAccessor) screen).questaddons$selectedChapter();
     }
 
     public static int rootX(BaseScreen screen, int original) {
@@ -138,8 +186,7 @@ public final class SplitView {
         current.updateGui(screen.getMouseX(), screen.getMouseY(), screen.getPartialTicks());
 
         Theme theme = current.getTheme();
-        QuestObjectBase previous =
-                QuestTheme.setFallbackQuestObject(((QuestScreenAccessor) current).questaddons$selectedChapter());
+        QuestObjectBase previous = QuestTheme.setFallbackQuestObject(selectedChapter(current));
         current.draw(graphics, theme, current.getX(), current.getY(), current.width, current.height);
         current.drawForeground(graphics, theme, current.getX(), current.getY(), current.width, current.height);
         QuestTheme.setFallbackQuestObject(previous);
@@ -270,6 +317,61 @@ public final class SplitView {
         }
 
         current.keyReleased(key);
+        return true;
+    }
+
+    /**
+     * FTB refreshes only the QuestScreen it considers current, so a refresh on the root is repeated
+     * on the pane.
+     */
+    public static void mirrorRefresh(QuestScreen source, Consumer<QuestScreen> refresh) {
+        SplitViewPane current = pane;
+        if (current != null && root == source) {
+            refresh.accept(current);
+        }
+    }
+
+    public static void refreshPaneQuests() {
+        SplitViewPane current = pane;
+        if (current != null) {
+            current.questPanel.withPreservedPos(Panel::refreshWidgets);
+        }
+    }
+
+    public static void refreshPaneTopButtons() {
+        SplitViewPane current = pane;
+        if (current != null) {
+            current.otherButtonsTopPanel.refreshWidgets();
+        }
+    }
+
+    /**
+     * Pane widgets call the final openGui on their own screen after a config screen closes, which
+     * would put the pane on the screen stack in place of the book.
+     */
+    public static boolean reopenRoot(BaseScreen screen) {
+        if (!(screen instanceof SplitViewPane)) {
+            return false;
+        }
+
+        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        if (file != null) {
+            file.getQuestScreen().ifPresent(BaseScreen::openGui);
+        }
+
+        return true;
+    }
+
+    public static boolean closeRoot(BaseScreen screen, boolean openPrevScreen) {
+        if (!(screen instanceof SplitViewPane)) {
+            return false;
+        }
+
+        QuestScreen owner = root;
+        if (owner != null) {
+            owner.closeGui(openPrevScreen);
+        }
+
         return true;
     }
 

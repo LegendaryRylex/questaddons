@@ -50,6 +50,21 @@ public abstract class QuestScreenSplitMixin {
         }
     }
 
+    @Inject(method = "refreshChapterPanel", at = @At("TAIL"))
+    private void questaddons$mirrorChapterPanelRefresh(CallbackInfo ci) {
+        SplitView.mirrorRefresh((QuestScreen) (Object) this, QuestScreen::refreshChapterPanel);
+    }
+
+    @Inject(method = "refreshQuestPanel", at = @At("TAIL"))
+    private void questaddons$mirrorQuestPanelRefresh(CallbackInfo ci) {
+        SplitView.mirrorRefresh((QuestScreen) (Object) this, QuestScreen::refreshQuestPanel);
+    }
+
+    @Inject(method = "refreshViewQuestPanel", at = @At("TAIL"))
+    private void questaddons$mirrorViewQuestPanelRefresh(CallbackInfo ci) {
+        SplitView.mirrorRefresh((QuestScreen) (Object) this, QuestScreen::refreshViewQuestPanel);
+    }
+
     @Inject(method = "tick", at = @At("TAIL"))
     private void questaddons$tickPane(CallbackInfo ci) {
         SplitView.tick((QuestScreen) (Object) this);
@@ -72,7 +87,7 @@ public abstract class QuestScreenSplitMixin {
     }
 
     @Inject(method = "onClosed", at = @At("HEAD"))
-    private void questaddons$closeSplitView(CallbackInfo ci) {
-        SplitView.close();
+    private void questaddons$detachSplitView(CallbackInfo ci) {
+        SplitView.detach((QuestScreen) (Object) this);
     }
 }

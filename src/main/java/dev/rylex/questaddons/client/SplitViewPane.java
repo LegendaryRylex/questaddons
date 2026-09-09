@@ -8,13 +8,19 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
  * foreign parent, so the owning screen must drive initGui, updateGui and draw by hand.
  */
 public class SplitViewPane extends QuestScreen {
+    private final ClientQuestFile questFile;
     private int paneX;
     private int paneY;
 
     public SplitViewPane(ClientQuestFile file) {
         super(file, null);
+        questFile = file;
         setOnlyRenderWidgetsInside(true);
         setOnlyInteractWithWidgetsInside(true);
+    }
+
+    public boolean isBackedBy(ClientQuestFile file) {
+        return questFile == file;
     }
 
     public void setBounds(int x, int y, int w, int h) {
