@@ -71,6 +71,22 @@ public final class QuestAddonsKeys {
             GLFW.GLFW_KEY_S,
             CATEGORY);
 
+    public static final KeyMapping SPLIT_VIEW = new KeyMapping(
+            "key.questaddons.keys.split_view",
+            KeyConflictContext.GUI,
+            KeyModifier.NONE,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_V,
+            CATEGORY);
+
+    public static final KeyMapping SPLIT_VIEW_STACKED = new KeyMapping(
+            "key.questaddons.keys.split_view_stacked",
+            KeyConflictContext.GUI,
+            KeyModifier.ALT,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_V,
+            CATEGORY);
+
     private QuestAddonsKeys() {}
 
     public static void init(IEventBus modBus) {
@@ -83,6 +99,8 @@ public final class QuestAddonsKeys {
             event.register(DELETE_OBJECT);
             event.register(QUEST_FILTER);
             event.register(SAVE_QUESTS);
+            event.register(SPLIT_VIEW);
+            event.register(SPLIT_VIEW_STACKED);
         });
     }
 
