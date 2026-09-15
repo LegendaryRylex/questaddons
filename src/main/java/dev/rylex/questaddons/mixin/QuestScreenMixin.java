@@ -54,7 +54,7 @@ public abstract class QuestScreenMixin {
     }
 
     @ModifyVariable(method = "getSnappedXY", at = @At("STORE"), name = "snap")
-    private double questaddons$quarterGridSnap(double original) {
+    private double questaddons$gridSnap(double original) {
         return GridSnap.SNAP;
     }
 }
