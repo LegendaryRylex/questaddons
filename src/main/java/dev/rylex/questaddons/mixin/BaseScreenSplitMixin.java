@@ -1,8 +1,12 @@
 package dev.rylex.questaddons.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.rylex.questaddons.client.SplitView;
+import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,6 +35,23 @@ public abstract class BaseScreenSplitMixin {
     private void questaddons$closeRootInsteadOfPane(boolean openPrevScreen, CallbackInfo ci) {
         if (SplitView.closeRoot((BaseScreen) (Object) this, openPrevScreen)) {
             ci.cancel();
+        }
+    }
+
+    @WrapOperation(
+            method = "draw",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Ldev/ftb/mods/ftblibrary/icon/Color4I;draw(Lnet/minecraft/client/gui/GuiGraphics;IIII)V"))
+    private void questaddons$scopeModalDim(
+            Color4I color, GuiGraphics graphics, int x, int y, int w, int h, Operation<Void> original) {
+        BaseScreen self = (BaseScreen) (Object) this;
+        if (SplitView.isSplitHalf(self)) {
+            original.call(color, graphics, self.getX(), self.getY(), self.width, self.height);
+        } else {
+            original.call(color, graphics, x, y, w, h);
         }
     }
 }

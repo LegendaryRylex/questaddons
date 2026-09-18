@@ -46,6 +46,14 @@ public final class SplitView {
     }
 
     /**
+     * BaseScreen dims the whole window behind its top modal panel, which would swallow the other
+     * half of the split.
+     */
+    public static boolean isSplitHalf(BaseScreen screen) {
+        return pane != null && (root == screen || pane == screen);
+    }
+
+    /**
      * The unmodified mapping also matches while Alt is held, so the stacked variant has to be tested
      * first.
      */
