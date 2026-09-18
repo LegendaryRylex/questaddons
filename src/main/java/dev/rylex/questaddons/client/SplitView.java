@@ -45,6 +45,14 @@ public final class SplitView {
         return pane != null && root == screen;
     }
 
+    /**
+     * BaseScreen dims the whole window behind its top modal panel, which would swallow the other
+     * half of the split.
+     */
+    public static boolean isSplitHalf(BaseScreen screen) {
+        return pane != null && (root == screen || pane == screen);
+    }
+
     @Nullable
     public static SplitOrientation requested(Key key) {
         if (key.matches(QuestAddonsKeys.SPLIT_VIEW_STACKED)) {
