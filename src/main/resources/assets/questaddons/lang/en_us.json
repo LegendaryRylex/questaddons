@@ -5,6 +5,7 @@
   "key.questaddons.keys.instant_complete": "Complete Instantly (hold + click a quest)",
   "key.questaddons.keys.reset_progress": "Reset Progress (hold + click a quest)",
   "key.questaddons.keys.delete_object": "Delete (hold + click a quest or image)",
+  "key.questaddons.keys.toggle_optional": "Toggle Optional (hover a quest task)",
   "key.questaddons.keys.quest_filter": "Smart Filter From Quest Items (in your inventory, from the hotbar, or the whole inventory with Shift)",
   "key.questaddons.keys.save_quests": "Save Quests on Server (hold Shift to download the quest files instead)",
   "key.questaddons.keys.split_view": "Split View (two chapters side by side)",

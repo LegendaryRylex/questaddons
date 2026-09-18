@@ -55,6 +55,14 @@ public final class QuestAddonsKeys {
             GLFW.GLFW_KEY_F,
             CATEGORY);
 
+    public static final KeyMapping TOGGLE_OPTIONAL = new KeyMapping(
+            "key.questaddons.keys.toggle_optional",
+            KeyConflictContext.GUI,
+            KeyModifier.NONE,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_O,
+            CATEGORY);
+
     public static final KeyMapping QUEST_FILTER = new KeyMapping(
             "key.questaddons.keys.quest_filter",
             KeyConflictContext.GUI,
@@ -97,6 +105,7 @@ public final class QuestAddonsKeys {
             event.register(INSTANT_COMPLETE);
             event.register(RESET_PROGRESS);
             event.register(DELETE_OBJECT);
+            event.register(TOGGLE_OPTIONAL);
             event.register(QUEST_FILTER);
             event.register(SAVE_QUESTS);
             event.register(SPLIT_VIEW);
