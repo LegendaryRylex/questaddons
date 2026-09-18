@@ -18,6 +18,8 @@
     "QuestScreenSelectionMixin",
     "QuestScreenSplitMixin",
     "ScreenWrapperSplitMixin",
+    "TaskAccessor",
+    "TaskButtonMixin",
     "ViewQuestPanelMixin"
   ],
   "injectors": {
