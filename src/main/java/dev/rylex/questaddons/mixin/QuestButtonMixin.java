@@ -5,12 +5,11 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestButton;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.rylex.questaddons.client.ClickGestureGuard;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
-import java.util.List;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,49 +31,6 @@ public abstract class QuestButtonMixin {
     public abstract Movable moveAndDeleteFocus();
 
     @Inject(method = "onClicked", at = @At("HEAD"), cancellable = true)
-    private void questaddons$changeProgress(MouseButton button, CallbackInfo ci) {
-        if (!button.isLeft()) {
-            return;
-        }
-
-        boolean reset;
-        if (QuestAddonsKeys.isInstantCompleteHeld()) {
-            reset = false;
-        } else if (QuestAddonsKeys.isResetProgressHeld()) {
-            reset = true;
-        } else {
-            return;
-        }
-
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
-        if (file == null || !file.canEdit()) {
-            return;
-        }
-
-        ((Widget) (Object) this).playClickSound();
-        ClickGestureGuard.arm(reset ? QuestAddonsKeys.RESET_PROGRESS : QuestAddonsKeys.INSTANT_COMPLETE);
-        ChangeProgressMessage.sendToServer(file.selfTeamData, quest, progressChange -> progressChange.setReset(reset));
-        ci.cancel();
-    }
-
-    @Inject(method = "onClicked", at = @At("HEAD"), cancellable = true)
-    private void questaddons$deleteObject(MouseButton button, CallbackInfo ci) {
-        if (!button.isLeft() || !QuestAddonsKeys.isDeleteObjectHeld()) {
-            return;
-        }
-
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
-        if (file == null || !file.canEdit()) {
-            return;
-        }
-
-        ((Widget) (Object) this).playClickSound();
-        ClickGestureGuard.arm(QuestAddonsKeys.DELETE_OBJECT);
-        file.deleteObjects(List.of(moveAndDeleteFocus().getMovableID()));
-        ci.cancel();
-    }
-
-    @Inject(method = "onClicked", at = @At("HEAD"), cancellable = true)
     private void questaddons$grabSelection(MouseButton button, CallbackInfo ci) {
         if (!button.isLeft() || !QuestAddonsKeys.isMoveSelectionHeld()) {
             return;
@@ -94,6 +50,24 @@ public abstract class QuestButtonMixin {
         ((Widget) (Object) this).playClickSound();
         ClickGestureGuard.arm(QuestAddonsKeys.MOVE_SELECTION);
         accessor.questaddons$setMovingObjects(true);
+        ci.cancel();
+    }
+
+    @Inject(method = "onClicked", at = @At("HEAD"), cancellable = true)
+    private void questaddons$toggleOptional(MouseButton button, CallbackInfo ci) {
+        if (!button.isRight() || !QuestAddonsKeys.isToggleOptionalHeld()) {
+            return;
+        }
+
+        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        if (file == null || !file.canEdit()) {
+            return;
+        }
+
+        ((QuestAccessor) (Object) quest).questaddons$setOptional(!quest.isOptional());
+        ((Widget) (Object) this).playClickSound();
+        ClickGestureGuard.arm(QuestAddonsKeys.TOGGLE_OPTIONAL);
+        EditObjectMessage.sendToServer(quest);
         ci.cancel();
     }
 }
