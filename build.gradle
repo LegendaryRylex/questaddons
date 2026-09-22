@@ -102,6 +102,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    inputs.file("README.md").withPropertyName("readme")
 }
 
 spotless {
