@@ -133,6 +133,10 @@ public final class QuestAddonsKeys {
         return isHeld(DELETE_OBJECT);
     }
 
+    public static boolean isToggleOptionalHeld() {
+        return isHeld(TOGGLE_OPTIONAL);
+    }
+
     public static boolean matches(KeyMapping mapping, KeyEvent keyEvent) {
         InputConstants.Key key = mapping.getKey();
         return key.getValue() != InputConstants.UNKNOWN.getValue() && key.equals(InputConstants.getKey(keyEvent));

@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestButton;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.rylex.questaddons.client.ClickGestureGuard;
@@ -96,6 +97,24 @@ public abstract class QuestButtonMixin {
         ((Widget) (Object) this).playClickSound();
         ClickGestureGuard.arm(QuestAddonsKeys.MOVE_SELECTION);
         accessor.questaddons$setMovingObjects(true);
+        ci.cancel();
+    }
+
+    @Inject(method = "onClicked", at = @At("HEAD"), cancellable = true)
+    private void questaddons$toggleOptional(MouseButton button, CallbackInfo ci) {
+        if (!button.isRight() || !QuestAddonsKeys.isToggleOptionalHeld()) {
+            return;
+        }
+
+        ClientQuestFile file = ClientQuestFile.getInstance();
+        if (file == null || !file.canEdit()) {
+            return;
+        }
+
+        ((QuestAccessor) (Object) quest).questaddons$setOptional(!quest.isOptional());
+        ((Widget) (Object) this).playClickSound();
+        ClickGestureGuard.arm(QuestAddonsKeys.TOGGLE_OPTIONAL);
+        EditObjectMessage.sendToServer(quest);
         ci.cancel();
     }
 }
