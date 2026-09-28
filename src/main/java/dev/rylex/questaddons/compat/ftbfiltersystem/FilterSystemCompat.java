@@ -24,17 +24,22 @@ public final class FilterSystemCompat {
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(SMART_FILTER);
     }
 
-    public static Optional<ItemStack> orFilterOf(Collection<Identifier> itemIds) {
-        if (itemIds.isEmpty()
+    public static Optional<String> filterOf(ItemStack stack) {
+        if (!isSmartFilter(stack) || !BuiltInRegistries.DATA_COMPONENT_TYPE.containsKey(FILTER_STRING)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(stack.get(filterComponent())).filter(filter -> !filter.isBlank());
+    }
+
+    public static Optional<ItemStack> orFilterOf(Collection<String> terms) {
+        if (terms.isEmpty()
                 || !BuiltInRegistries.ITEM.containsKey(SMART_FILTER)
                 || !BuiltInRegistries.DATA_COMPONENT_TYPE.containsKey(FILTER_STRING)) {
             return Optional.empty();
         }
 
         ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(SMART_FILTER));
-        stack.set(
-                filterComponent(),
-                FilterSyntax.or(itemIds.stream().map(Identifier::toString).toList()));
+        stack.set(filterComponent(), FilterSyntax.or(terms));
         return Optional.of(stack);
     }
 

@@ -11,7 +11,7 @@
   "key.questaddons.keys.split_view": "Split View (two chapters side by side)",
   "key.questaddons.keys.split_view_stacked": "Split View Stacked (two chapters one above the other)",
   "questaddons.smart_filter.given": "Smart Filter",
-  "questaddons.smart_filter.given_detail": "Matches any of %s items",
+  "questaddons.smart_filter.given_detail": "Matches any of %s entries",
   "questaddons.smart_filter.no_items": "This quest has no item tasks",
   "questaddons.smart_filter.no_hotbar_items": "No items in the hotbar",
   "questaddons.smart_filter.no_inventory_items": "No items in the inventory",

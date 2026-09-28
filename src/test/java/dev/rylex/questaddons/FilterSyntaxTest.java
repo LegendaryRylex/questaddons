@@ -9,14 +9,22 @@ import org.junit.jupiter.api.Test;
 class FilterSyntaxTest {
 
     @Test
-    void orWrapsEveryItemIdWithNoSeparators() {
+    void orJoinsItemTermsWithNoSeparators() {
         assertEquals(
                 "or(item(ltxi:rocket_turret)item(ltxi:arc_turret))",
-                FilterSyntax.or(List.of("ltxi:rocket_turret", "ltxi:arc_turret")));
+                FilterSyntax.or(
+                        List.of(FilterSyntax.item("ltxi:rocket_turret"), FilterSyntax.item("ltxi:arc_turret"))));
     }
 
     @Test
     void orKeepsASingleItemWrapped() {
-        assertEquals("or(item(minecraft:stone))", FilterSyntax.or(List.of("minecraft:stone")));
+        assertEquals("or(item(minecraft:stone))", FilterSyntax.or(List.of(FilterSyntax.item("minecraft:stone"))));
+    }
+
+    @Test
+    void orEmbedsAnExistingFilterVerbatim() {
+        assertEquals(
+                "or(ftbfiltersystem:item_tag(c:ingots)item(minecraft:stone))",
+                FilterSyntax.or(List.of("ftbfiltersystem:item_tag(c:ingots)", FilterSyntax.item("minecraft:stone"))));
     }
 }

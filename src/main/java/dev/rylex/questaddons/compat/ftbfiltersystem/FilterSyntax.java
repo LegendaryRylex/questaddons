@@ -6,10 +6,10 @@ import java.util.StringJoiner;
 public final class FilterSyntax {
     private FilterSyntax() {}
 
-    public static String or(Collection<String> itemIds) {
-        StringJoiner terms = new StringJoiner("", "or(", ")");
-        itemIds.forEach(id -> terms.add(item(id)));
-        return terms.toString();
+    public static String or(Collection<String> terms) {
+        StringJoiner filter = new StringJoiner("", "or(", ")");
+        terms.forEach(filter::add);
+        return filter.toString();
     }
 
     public static String item(String itemId) {

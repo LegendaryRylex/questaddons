@@ -4,12 +4,11 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.rylex.questaddons.compat.ftbfiltersystem.FilterSystemCompat;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -18,7 +17,7 @@ public final class SmartFilter {
 
     private SmartFilter() {}
 
-    public static boolean give(Set<Identifier> itemIds, String noItemsKey) {
+    public static boolean give(Collection<String> terms, String noItemsKey) {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         if (player == null || minecraft.gameMode == null) {
@@ -31,11 +30,11 @@ public final class SmartFilter {
         if (!minecraft.gameMode.getPlayerMode().isCreative()) {
             return failed("questaddons.smart_filter.creative_only");
         }
-        if (itemIds.isEmpty()) {
+        if (terms.isEmpty()) {
             return failed(noItemsKey);
         }
 
-        Optional<ItemStack> filter = FilterSystemCompat.orFilterOf(itemIds);
+        Optional<ItemStack> filter = FilterSystemCompat.orFilterOf(terms);
         if (filter.isEmpty()) {
             return failed("questaddons.smart_filter.mod_missing");
         }
@@ -56,7 +55,7 @@ public final class SmartFilter {
                 .addToast(new CustomToast(
                         Component.translatable("questaddons.smart_filter.given"),
                         ItemIcon.ofItemStack(stack),
-                        Component.translatable("questaddons.smart_filter.given_detail", itemIds.size())));
+                        Component.translatable("questaddons.smart_filter.given_detail", terms.size())));
         return true;
     }
 
