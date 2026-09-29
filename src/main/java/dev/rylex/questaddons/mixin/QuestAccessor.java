@@ -8,4 +8,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface QuestAccessor {
     @Accessor("optional")
     void questaddons$setOptional(boolean optional);
+
+    @Accessor("shape")
+    String questaddons$getShape();
+
+    @Accessor("shape")
+    void questaddons$setShape(String shape);
 }
