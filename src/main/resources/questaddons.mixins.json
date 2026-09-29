@@ -8,6 +8,8 @@
     "ChapterImageButtonMixin",
     "ChapterPanelMixin",
     "KeyMixin",
+    "MultilineTextEditorScreenMixin",
+    "MultilineTextEditorToolbarMixin",
     "NetClientSplitMixin",
     "QuestAccessor",
     "QuestButtonMixin",
