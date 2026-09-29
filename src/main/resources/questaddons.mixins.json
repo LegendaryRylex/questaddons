@@ -9,6 +9,7 @@
     "ChapterPanelMixin",
     "KeyMixin",
     "NetClientSplitMixin",
+    "QuestAccessor",
     "QuestButtonMixin",
     "QuestPanelMixin",
     "QuestScreenAccessor",

@@ -10,6 +10,7 @@
   "key.questaddons.save_quests": "Save Quests on Server (hold Shift to download the quest files instead)",
   "key.questaddons.split_view": "Split View (two chapters side by side)",
   "key.questaddons.split_view_stacked": "Split View Stacked (two chapters one above the other)",
+  "questaddons.gui.change_shape_all": "Change Shape for all: %s",
   "questaddons.smart_filter.given": "Smart Filter",
   "questaddons.smart_filter.given_detail": "Matches any of %s items",
   "questaddons.smart_filter.no_items": "This quest has no item tasks",

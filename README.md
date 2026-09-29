@@ -21,6 +21,7 @@ Editing keybinds need edit mode, and the Smart Filter needs FTB Filter System in
 - Placing or moving quests always snaps to a 0.5 grid, whatever the quest book's Grid Scale is set to.
 - Numpad Enter is accepted anywhere the quest book accepts Enter.
 - Tooltips on quest context menus draw in front of the menu instead of behind it.
+- Right-clicking a selected quest offers Change Shape for all, which cycles every selected quest's shape: left-click for the next shape, right-click for the previous, with the menu staying open.
 
 Client-side only. Nothing is required on the server; edits go through FTB Quests' own editor packets.
 
