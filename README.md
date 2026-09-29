@@ -10,6 +10,8 @@ Right-clicking a selected quest offers Change Shape for all, which cycles every 
 
 An open quest can also be turned straight into an FTB Filter System smart filter matching everything its item tasks ask for, handed to you in creative mode.
 
+The quest description editor gets a JSON Fixer button next to Convert to JSON (Alt + F). It repairs every broken JSON text line in the description: missing or extra brackets, trailing or missing commas, single or curly quotes, unquoted keys, stray quotes inside text, miscased colour names and string booleans. Click and hover events written in the pre-1.21.5 camelCase format are converted, and old change_page quest links and docs: links become FTB Quests link events. Lines it cannot repair are listed and the cursor jumps to the first one.
+
 Client-side only. Nothing is required on the server, and the quest file is never modified.
 
 NeoForge mod for Minecraft 26.1.2. Requires FTB Quests.
