@@ -30,26 +30,42 @@ public final class DescriptionJsonFixer {
                     LenientJson.parse(line).map(ComponentJsonRepair::repairLine).filter(json -> parses(json, provider));
             if (repaired.isEmpty()) {
                 unfixable.add(i + 1);
-            } else if (!alreadyWorks(line, repaired.get(), provider)) {
-                lines[i] = repaired.get().toString();
-                fixed++;
+            } else {
+                String spaced = spaced(line, repaired.get(), provider);
+                if (!spaced.equals(line)) {
+                    lines[i] = spaced;
+                    fixed++;
+                }
             }
         }
         return new Result(String.join("\n", lines), fixed, List.copyOf(unfixable));
     }
 
+    private static String spaced(String line, JsonElement repaired, HolderLookup.Provider provider) {
+        if (alreadyWorks(line, repaired, provider)) {
+            String respaced = JsonSpacing.spaced(line);
+            if (strict(respaced).filter(repaired::equals).isPresent()) {
+                return respaced;
+            }
+        }
+        return JsonSpacing.spaced(repaired.toString());
+    }
+
+    private static Optional<JsonElement> strict(String line) {
+        try {
+            return Optional.of(JsonParser.parseString(UNESCAPER.translate(line)));
+        } catch (RuntimeException e) {
+            return Optional.empty();
+        }
+    }
+
     private static boolean alreadyWorks(String line, JsonElement repaired, HolderLookup.Provider provider) {
         boolean bracketed =
                 (line.startsWith("[") && line.endsWith("]")) || (line.startsWith("{") && line.endsWith("}"));
-        if (!bracketed) {
-            return false;
-        }
-        try {
-            JsonElement current = JsonParser.parseString(UNESCAPER.translate(line));
-            return current.equals(repaired) && parses(current, provider);
-        } catch (RuntimeException e) {
-            return false;
-        }
+        return bracketed
+                && strict(line)
+                        .filter(current -> current.equals(repaired) && parses(current, provider))
+                        .isPresent();
     }
 
     private static boolean parses(JsonElement json, HolderLookup.Provider provider) {
