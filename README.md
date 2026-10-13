@@ -6,7 +6,7 @@ Laying out a quest book means a lot of repeated mouse work that FTB Quests puts 
 
 Selecting and moving quests happens on the left mouse button while a keybind is held, instead of the middle button, and panning gets out of the way while it is. Numpad Enter is accepted anywhere the quest book accepts Enter.
 
-Right-clicking a selected quest offers Change Shape for all, which cycles every selected quest's shape: left-click for the next shape, right-click for the previous, with the menu staying open.
+Right-clicking a selected quest offers Change Shape for all, which opens a sub-menu of every shape, the current one ticked; picking one applies it to every selected quest.
 
 An open quest can also be turned straight into an FTB Filter System smart filter matching everything its item tasks ask for, handed to you in creative mode.
 
