@@ -2,6 +2,7 @@ package dev.rylex.questaddons.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestPanel;
@@ -9,6 +10,8 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.rylex.questaddons.client.BoxSelectState;
 import dev.rylex.questaddons.client.GridSnap;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
+import dev.rylex.questaddons.client.SplitView;
+import net.minecraft.client.gui.GuiGraphics;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,6 +54,24 @@ public abstract class QuestPanelMixin {
         ((QuestScreenAccessor) questScreen)
                 .questaddons$selectAllQuestsInBox(
                         self.getMouseX(), self.getMouseY(), self.getScrollX(), self.getScrollY());
+    }
+
+    @Inject(method = "drawOffsetBackground", at = @At("HEAD"))
+    private void questaddons$clipToSplitHalf(
+            GuiGraphics graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
+        if (SplitView.isSplitHalf(questScreen)) {
+            int left = questScreen.getX();
+            int top = questScreen.getY();
+            graphics.enableScissor(left, top, left + questScreen.width, top + questScreen.height);
+        }
+    }
+
+    @Inject(method = "drawOffsetBackground", at = @At("RETURN"))
+    private void questaddons$endSplitHalfClip(
+            GuiGraphics graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
+        if (SplitView.isSplitHalf(questScreen)) {
+            graphics.disableScissor();
+        }
     }
 
     @ModifyExpressionValue(
