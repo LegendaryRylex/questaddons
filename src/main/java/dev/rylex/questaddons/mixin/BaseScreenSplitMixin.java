@@ -39,7 +39,7 @@ public abstract class BaseScreenSplitMixin {
     }
 
     @WrapOperation(
-            method = "draw",
+            method = "drawForeground",
             at =
                     @At(
                             value = "INVOKE",
