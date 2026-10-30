@@ -11,4 +11,7 @@ public interface QuestAccessor {
 
     @Accessor("shape")
     void questaddons$setShape(String shape);
+
+    @Accessor("optional")
+    void questaddons$setOptional(boolean optional);
 }
