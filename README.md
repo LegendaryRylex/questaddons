@@ -32,4 +32,4 @@ Editing keybinds need edit mode, and the Smart Filter needs FTB Filter System in
 
 Client-side only. Nothing is required on the server; edits go through FTB Quests' own editor packets.
 
-NeoForge mod for Minecraft 1.21.1. Requires FTB Quests 2101.1.36 or newer.
+NeoForge mod for Minecraft 1.21.1. Requires FTB Quests 2101.1.28 or newer.
