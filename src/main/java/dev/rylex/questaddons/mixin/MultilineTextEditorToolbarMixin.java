@@ -21,7 +21,13 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
     private static final int FIX_JSON_X = 213;
 
     @Unique
+    private static final int KEYBIND_X = FIX_JSON_X + 16;
+
+    @Unique
     private SimpleTextButton questaddons$fixJsonButton;
+
+    @Unique
+    private SimpleTextButton questaddons$keybindButton;
 
     private MultilineTextEditorToolbarMixin(Panel panel) {
         super(panel);
@@ -40,17 +46,27 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                 Component.translatable("questaddons.gui.fix_json.hotkey", modifier)
                         .withStyle(ChatFormatting.DARK_GRAY));
         add(questaddons$fixJsonButton);
+
+        questaddons$keybindButton = SimpleTextButton.create(
+                this,
+                Component.empty(),
+                Icons.KEYBOARD.withPadding(2),
+                button -> ((JsonFixHost) getGui()).questaddons$openKeybindMenu(),
+                Component.translatable("questaddons.gui.insert_keybind"),
+                Component.translatable("questaddons.gui.insert_keybind.tooltip"));
+        add(questaddons$keybindButton);
     }
 
     @ModifyConstant(method = "alignWidgets", constant = @Constant(intValue = 223))
     private int questaddons$shiftUndoButton(int x) {
-        return x + 16;
+        return x + 32;
     }
 
     @Inject(method = "alignWidgets", at = @At("TAIL"))
     private void questaddons$placeFixJsonButton(CallbackInfo ci) {
         if (questaddons$fixJsonButton != null) {
             questaddons$fixJsonButton.setPosAndSize(FIX_JSON_X, 1, 16, 16);
+            questaddons$keybindButton.setPosAndSize(KEYBIND_X, 1, 16, 16);
         }
     }
 }
