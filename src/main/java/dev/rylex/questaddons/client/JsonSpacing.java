@@ -19,21 +19,6 @@ public final class JsonSpacing {
                     out.append(json, i, end);
                     i = end;
                 }
-                case '{', '[' -> {
-                    char closer = c == '{' ? '}' : ']';
-                    int next = skipWhitespace(json, i + 1);
-                    if (next < json.length() && json.charAt(next) == closer) {
-                        out.append(c).append(closer);
-                        i = next + 1;
-                    } else {
-                        out.append(c).append(' ');
-                        i++;
-                    }
-                }
-                case '}', ']' -> {
-                    out.append(' ').append(c);
-                    i++;
-                }
                 case ',', ':' -> {
                     out.append(c).append(' ');
                     i++;
@@ -60,13 +45,5 @@ public final class JsonSpacing {
             }
         }
         return json.length();
-    }
-
-    private static int skipWhitespace(String json, int from) {
-        int i = from;
-        while (i < json.length() && Character.isWhitespace(json.charAt(i))) {
-            i++;
-        }
-        return i;
     }
 }

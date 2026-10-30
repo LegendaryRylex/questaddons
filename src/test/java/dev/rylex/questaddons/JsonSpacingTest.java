@@ -13,18 +13,21 @@ class JsonSpacingTest {
             delimiter = '|',
             quoteCharacter = '`',
             value = {
-                "{\"text\":\"a\"}|{ \"text\": \"a\" }",
-                "{\"text\":\"a\",\"color\":\"red\"}|{ \"text\": \"a\", \"color\": \"red\" }",
-                "[\"\",{\"text\":\"a\"},{\"text\":\"b\"}]|[ \"\", { \"text\": \"a\" }, { \"text\": \"b\" } ]",
-                "{\"text\":\"a\",\"bold\":true}|{ \"text\": \"a\", \"bold\": true }",
-                "{\"text\":\"a\",\"with\":[]}|{ \"text\": \"a\", \"with\": [] }",
-                "{\"text\":\"a\",\"extra\":[ ]}|{ \"text\": \"a\", \"extra\": [] }",
-                "{   \"text\"  :  \"a\"  ,\"color\":\"red\"}|{ \"text\": \"a\", \"color\": \"red\" }",
-                "{\"text\":\"a,b:c {d} [e]\"}|{ \"text\": \"a,b:c {d} [e]\" }",
-                "{\"text\":\"say \\\"hi\\\", ok\"}|{ \"text\": \"say \\\"hi\\\", ok\" }",
-                "{\"text\":\"\\u00a76a\"}|{ \"text\": \"\\u00a76a\" }",
+                "{\"text\":\"a\"}|{\"text\": \"a\"}",
+                "{\"text\":\"a\",\"color\":\"red\"}|{\"text\": \"a\", \"color\": \"red\"}",
+                "[\"\",{\"text\":\"a\"},{\"text\":\"b\"}]|[\"\", {\"text\": \"a\"}, {\"text\": \"b\"}]",
+                "{\"text\":\"a\",\"bold\":true}|{\"text\": \"a\", \"bold\": true}",
+                "{\"text\":\"a\",\"with\":[]}|{\"text\": \"a\", \"with\": []}",
+                "{\"text\":\"a\",\"extra\":[ ]}|{\"text\": \"a\", \"extra\": []}",
+                "{\"extra\":[\"a\",{\"text\":\"b\"}],\"bold\":true}|{\"extra\": [\"a\", {\"text\": \"b\"}], \"bold\": true}",
+                "{\"extra\":[\"a\"],\"with\":{ }}|{\"extra\": [\"a\"], \"with\": {}}",
+                "{ \"text\": \"a\", \"extra\": [ \"b\" ] }|{\"text\": \"a\", \"extra\": [\"b\"]}",
+                "{   \"text\"  :  \"a\"  ,\"color\":\"red\"}|{\"text\": \"a\", \"color\": \"red\"}",
+                "{\"text\":\"a,b:c {d} [e]\"}|{\"text\": \"a,b:c {d} [e]\"}",
+                "{\"text\":\"say \\\"hi\\\", ok\"}|{\"text\": \"say \\\"hi\\\", ok\"}",
+                "{\"text\":\"\\u00a76a\"}|{\"text\": \"\\u00a76a\"}",
                 "{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://a.b/c\"}}"
-                        + "|{ \"clickEvent\": { \"action\": \"open_url\", \"value\": \"https://a.b/c\" } }"
+                        + "|{\"clickEvent\": {\"action\": \"open_url\", \"value\": \"https://a.b/c\"}}"
             })
     void spacesEveryMember(String line, String expected) {
         assertEquals(expected, JsonSpacing.spaced(line));
