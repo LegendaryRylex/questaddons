@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "BaseScreenSplitMixin",
+    "ButtonListSearchMixin",
     "ChapterImageButtonMixin",
     "ChapterPanelMixin",
     "KeyMixin",
@@ -13,6 +14,7 @@
     "NetClientSplitMixin",
     "QuestAccessor",
     "QuestButtonMixin",
+    "QuestObjectButtonMixin",
     "QuestPanelMixin",
     "QuestScreenAccessor",
     "QuestScreenFilterMixin",
