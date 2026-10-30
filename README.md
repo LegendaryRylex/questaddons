@@ -8,9 +8,14 @@ Laying out a quest book means a lot of repeated mouse work that FTB Quests puts 
 
 | Keybind | Default | What it does |
 |---|---|---|
+| Box Select | Left Shift | Hold and drag to select quests with a box. |
 | Move Selection | Left Shift | Hold and left-click a quest or chapter image to pick up the selection and move it, adding the clicked object if it was not selected. Images with Lock Position set stay put. |
+| Complete Instantly | C | Hold and click a quest to complete it. |
+| Reset Progress | R | Hold and click a quest to reset its progress. |
+| Delete | F | Hold and click a quest or chapter image to delete it. |
 | Toggle Optional | O | Press while hovering a task to make it optional or required, or hold and right-click a quest to toggle the quest. |
 | Smart Filter From Quest Items | Numpad + | In an open quest, gives an FTB Filter System smart filter matching everything its item tasks ask for. In your inventory, matches the hotbar, or the whole inventory with Shift. Creative mode only. |
+| Save Quests on Server | Ctrl + S | Saves the quest book on the server, or downloads the quest files instead with Shift held. |
 | Split View | V | Opens a second chapter side by side with the first. Both halves are live and editable, and the split survives recipe viewer round trips. Press again to close it. |
 | Split View Stacked | Alt + V | The same, with one chapter above the other. |
 
