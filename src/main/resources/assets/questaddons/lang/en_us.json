@@ -17,6 +17,8 @@
   "questaddons.gui.fix_json.fixed": "Fixed %s JSON lines",
   "questaddons.gui.fix_json.nothing": "No broken JSON lines found",
   "questaddons.gui.fix_json.unfixable": "Fixed %s, could not fix line %s",
+  "questaddons.gui.insert_keybind": "Insert Keybind",
+  "questaddons.gui.insert_keybind.tooltip": "Picks any keybind, bound or not, and adds it to the description as JSON at the cursor",
   "questaddons.smart_filter.given": "Smart Filter",
   "questaddons.smart_filter.given_detail": "Matches any of %s entries",
   "questaddons.smart_filter.no_items": "This quest has no item tasks",

@@ -12,6 +12,8 @@ An open quest can also be turned straight into an FTB Filter System smart filter
 
 The quest description editor gets a JSON Fixer button next to Convert to JSON (Alt + F). It repairs every broken JSON text line in the description: missing or extra brackets, trailing or missing commas, single or curly quotes, unquoted keys, stray quotes inside text, miscased colour names and string booleans. Click and hover events written in the pre-1.21.5 camelCase format are converted, and old change_page quest links and docs: links become FTB Quests link events. Lines it cannot repair are listed and the cursor jumps to the first one.
 
+The quest description editor also gets an Insert Keybind button next to the JSON Fixer. It opens a searchable dropdown of every keybind in the game, bound or not, and adds the one you pick as a JSON keybind entry at the cursor. It shows each player their own key in yellow, with the default key on hover. On a plain text line the line becomes JSON with its colours kept, and the selection, if any, is replaced.
+
 Client-side only. Nothing is required on the server, and the quest file is never modified.
 
 NeoForge mod for Minecraft 26.1.2. Requires FTB Quests.

@@ -21,6 +21,9 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
     @Unique
     private SimpleTextButton questaddons$fixJsonButton;
 
+    @Unique
+    private SimpleTextButton questaddons$keybindButton;
+
     private MultilineTextEditorToolbarMixin(Panel panel) {
         super(panel);
     }
@@ -38,6 +41,15 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                 Component.translatable("questaddons.gui.fix_json.hotkey", modifier)
                         .withStyle(ChatFormatting.DARK_GRAY));
         add(questaddons$fixJsonButton);
+
+        questaddons$keybindButton = SimpleTextButton.create(
+                this,
+                Component.empty(),
+                Icons.KEYBOARD.withPadding(2),
+                button -> ((JsonFixHost) getGui()).questaddons$openKeybindMenu(),
+                Component.translatable("questaddons.gui.insert_keybind"),
+                Component.translatable("questaddons.gui.insert_keybind.tooltip"));
+        add(questaddons$keybindButton);
     }
 
     /** Finds convert and undo by position, the last two left-aligned buttons, since FTB Quests moves them between releases. */
@@ -48,7 +60,9 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
         }
 
         List<Widget> leftAligned = getWidgets().stream()
-                .filter(widget -> widget != questaddons$fixJsonButton && widget.getPosX() < width - 17)
+                .filter(widget -> widget != questaddons$fixJsonButton
+                        && widget != questaddons$keybindButton
+                        && widget.getPosX() < width - 17)
                 .sorted(Comparator.comparingInt(Widget::getPosX))
                 .toList();
         if (leftAligned.size() < 2) {
@@ -58,6 +72,7 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
         Widget convert = leftAligned.get(leftAligned.size() - 2);
         Widget undo = leftAligned.getLast();
         questaddons$fixJsonButton.setPosAndSize(convert.getPosX() + 16, 1, 16, 16);
-        undo.setPos(undo.getPosX() + 16, undo.getPosY());
+        questaddons$keybindButton.setPosAndSize(convert.getPosX() + 32, 1, 16, 16);
+        undo.setPos(undo.getPosX() + 32, undo.getPosY());
     }
 }

@@ -1,12 +1,17 @@
 package dev.rylex.questaddons.mixin;
 
+import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
+import dev.ftb.mods.ftblibrary.client.gui.widget.DropDownMenu;
 import dev.ftb.mods.ftblibrary.client.gui.widget.MultilineTextBox;
+import dev.ftb.mods.ftblibrary.client.gui.widget.TextBox;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.rylex.questaddons.client.DescriptionJsonFixer;
 import dev.rylex.questaddons.client.JsonFixHost;
+import dev.rylex.questaddons.client.KeybindInsertion;
+import dev.rylex.questaddons.client.KeybindMenu;
 import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
@@ -50,6 +55,29 @@ public abstract class MultilineTextEditorScreenMixin implements JsonFixHost {
         textBox.seekCursor(Whence.ABSOLUTE, cursor);
         textBox.setFocused(true);
         toast(result);
+    }
+
+    @Override
+    public void questaddons$openKeybindMenu() {
+        textBox.setFocused(false);
+        DropDownMenu menu =
+                ((BaseScreen) (Object) this).openDropdownMenu(KeybindMenu.items(this::questaddons$insertKeybind));
+        menu.getWidgets().stream().filter(TextBox.class::isInstance).forEach(widget -> ((TextBox) widget)
+                .setFocused(true));
+    }
+
+    private void questaddons$insertKeybind(String element) {
+        MultilineTextBox.StringExtents selected = textBox.getSelected();
+        KeybindInsertion.Result result = KeybindInsertion.insert(
+                textBox.getText(),
+                selected.start(),
+                selected.end(),
+                element,
+                marked -> KeybindMenu.plainLineToJson(marked, element, FTBQuestsClient.holderLookup()));
+        textBox.setSelecting(false);
+        textBox.setText(result.text());
+        textBox.seekCursor(Whence.ABSOLUTE, result.cursor());
+        textBox.setFocused(true);
     }
 
     private static void toast(DescriptionJsonFixer.Result result) {
