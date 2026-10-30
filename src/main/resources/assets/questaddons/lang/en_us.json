@@ -20,7 +20,7 @@
   "questaddons.gui.insert_keybind": "Insert Keybind",
   "questaddons.gui.insert_keybind.tooltip": "Picks any keybind, bound or not, and adds it to the description as JSON at the cursor",
   "questaddons.smart_filter.given": "Smart Filter",
-  "questaddons.smart_filter.given_detail": "Matches any of %s items",
+  "questaddons.smart_filter.given_detail": "Matches any of %s entries",
   "questaddons.smart_filter.no_items": "This quest has no item tasks",
   "questaddons.smart_filter.no_hotbar_items": "No items in the hotbar",
   "questaddons.smart_filter.no_inventory_items": "No items in the inventory",
