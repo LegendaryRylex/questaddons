@@ -3,6 +3,9 @@ package dev.rylex.questaddons.client;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.ui.BaseScreen;
+import dev.ftb.mods.ftblibrary.ui.Button;
+import dev.ftb.mods.ftblibrary.ui.ContextMenu;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -40,7 +43,17 @@ public final class ChangeShapeForAll {
         }
         Component title = Component.translatable(
                 "questaddons.gui.change_shape_all", QuestShape.idMapWithDefault.getDisplayName(current));
-        return ContextMenuItem.subMenu(title, Icons.SETTINGS, options);
+        return new ContextMenuItem(title, Icons.SETTINGS, button -> openOptions(button, options)).setCloseMenu(false);
+    }
+
+    private static void openOptions(Button button, List<ContextMenuItem> options) {
+        ContextMenu menu = new ContextMenu(button.getParent(), options);
+        BaseScreen gui = button.getGui();
+        gui.openContextMenu(menu);
+        int x = MenuPlacement.beside(
+                button.getX(), button.getX() + button.width, menu.width, gui.getX(), gui.getX() + gui.width);
+        int y = MenuPlacement.within(button.getY(), menu.height, gui.getY(), gui.getY() + gui.height);
+        menu.setPos(x - button.getX() + button.getPosX(), y - button.getY() + button.getPosY());
     }
 
     private static void apply(List<Quest> quests, String shape) {
