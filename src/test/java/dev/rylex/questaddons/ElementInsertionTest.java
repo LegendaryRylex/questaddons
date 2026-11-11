@@ -2,19 +2,19 @@ package dev.rylex.questaddons;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import dev.rylex.questaddons.client.KeybindInsertion;
+import dev.rylex.questaddons.client.ElementInsertion;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class KeybindInsertionTest {
-    private static final String KEY = KeybindInsertion.element("key.jump", "Space");
+class ElementInsertionTest {
+    private static final String KEY = ElementInsertion.keybind("key.jump", "Space");
 
-    private static KeybindInsertion.Result insert(String marked) {
+    private static ElementInsertion.Result insert(String marked) {
         int start = marked.indexOf('|');
         int end = marked.lastIndexOf('|');
         String text = marked.replace("|", "");
-        return KeybindInsertion.insert(text, start, end == start ? start : end - 1, KEY, plain -> "PLAIN:" + plain);
+        return ElementInsertion.insert(text, start, end == start ? start : end - 1, KEY, plain -> "PLAIN:" + plain);
     }
 
     @ParameterizedTest
@@ -47,12 +47,12 @@ class KeybindInsertionTest {
     void elementCarriesColourAndDefaultKey() {
         assertEquals(
                 "{\"keybind\": \"key.jei.showRecipe\", \"color\": \"yellow\", \"hover_event\": {\"action\": \"show_text\", \"value\": \"Default: R\"}}",
-                KeybindInsertion.element("key.jei.showRecipe", "R"));
+                ElementInsertion.keybind("key.jei.showRecipe", "R"));
     }
 
     @Test
     void cursorLandsAfterTheElement() {
-        KeybindInsertion.Result result = insert("[ \"a|b\" ]");
+        ElementInsertion.Result result = insert("[ \"a|b\" ]");
         assertEquals(result.text().indexOf(KEY) + KEY.length(), result.cursor());
     }
 
@@ -67,10 +67,10 @@ class KeybindInsertionTest {
     @Test
     void plainLinesGoThroughTheConverterWithAMarker() {
         assertEquals(
-                "PLAIN:&aPress " + KeybindInsertion.MARKER + " now",
+                "PLAIN:&aPress " + ElementInsertion.MARKER + " now",
                 insert("&aPress | now").text());
         assertEquals(
-                "PLAIN:Press " + KeybindInsertion.MARKER + " now",
+                "PLAIN:Press " + ElementInsertion.MARKER + " now",
                 insert("Press |to| now").text());
     }
 
@@ -84,7 +84,7 @@ class KeybindInsertionTest {
     @Test
     void selectionAcrossLinesIsKept() {
         assertEquals(
-                "PLAIN:o" + KeybindInsertion.MARKER + "ne\ntwo",
+                "PLAIN:o" + ElementInsertion.MARKER + "ne\ntwo",
                 insert("o|ne\ntw|o").text().replace("twoo", "two"));
     }
 }
