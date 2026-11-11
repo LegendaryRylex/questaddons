@@ -2,16 +2,16 @@ package dev.rylex.questaddons.mixin;
 
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.DropDownMenu;
 import dev.ftb.mods.ftblibrary.ui.MultilineTextBox;
-import dev.ftb.mods.ftblibrary.ui.TextBox;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
+import dev.rylex.questaddons.client.ComponentJson;
+import dev.rylex.questaddons.client.DescriptionEditor;
+import dev.rylex.questaddons.client.DescriptionInsert;
 import dev.rylex.questaddons.client.DescriptionJsonFixer;
-import dev.rylex.questaddons.client.JsonFixHost;
-import dev.rylex.questaddons.client.KeybindInsertion;
-import dev.rylex.questaddons.client.KeybindMenu;
+import dev.rylex.questaddons.client.ElementInsertion;
+import dev.rylex.questaddons.client.InsertContext;
 import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = MultilineTextEditorScreen.class, remap = false)
-public abstract class MultilineTextEditorScreenMixin implements JsonFixHost {
+public abstract class MultilineTextEditorScreenMixin implements DescriptionEditor {
     @Shadow
     @Final
     private MultilineTextBox textBox;
@@ -58,22 +58,28 @@ public abstract class MultilineTextEditorScreenMixin implements JsonFixHost {
     }
 
     @Override
-    public void questaddons$openKeybindMenu() {
+    public void questaddons$insert(DescriptionInsert insert) {
+        MultilineTextBox.StringExtents selected = textBox.getSelected();
+        int start = selected.start();
+        int end = selected.end();
+        String selection = textBox.getText().substring(start, end);
         textBox.setFocused(false);
-        DropDownMenu menu =
-                ((BaseScreen) (Object) this).openDropdownMenu(KeybindMenu.items(this::questaddons$insertKeybind));
-        menu.getWidgets().stream().filter(TextBox.class::isInstance).forEach(widget -> ((TextBox) widget)
-                .setFocused(true));
+        insert.open(new InsertContext(
+                (BaseScreen) (Object) this,
+                selection.indexOf('\n') >= 0 ? "" : selection,
+                element -> questaddons$put(start, end, element),
+                () -> textBox.setFocused(true)));
     }
 
-    private void questaddons$insertKeybind(String element) {
-        MultilineTextBox.StringExtents selected = textBox.getSelected();
-        KeybindInsertion.Result result = KeybindInsertion.insert(
-                textBox.getText(),
-                selected.start(),
-                selected.end(),
+    private void questaddons$put(int start, int end, String element) {
+        String text = textBox.getText();
+        int from = Math.min(start, text.length());
+        ElementInsertion.Result result = ElementInsertion.insert(
+                text,
+                from,
+                Math.max(from, Math.min(end, text.length())),
                 element,
-                marked -> KeybindMenu.plainLineToJson(marked, element, FTBQuestsClient.holderLookup()));
+                marked -> ComponentJson.plainLineToJson(marked, element, FTBQuestsClient.holderLookup()));
         textBox.setSelecting(false);
         textBox.setText(result.text());
         textBox.seekCursor(Whence.ABSOLUTE, result.cursor());

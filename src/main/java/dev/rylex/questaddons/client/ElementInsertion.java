@@ -3,12 +3,12 @@ package dev.rylex.questaddons.client;
 import com.google.gson.JsonPrimitive;
 import java.util.function.UnaryOperator;
 
-public final class KeybindInsertion {
+public final class ElementInsertion {
     public static final char MARKER = '\uE000';
-    private static final String ELEMENT =
+    private static final String KEYBIND =
             "{\"keybind\": %s, \"color\": \"yellow\", \"hoverEvent\": {\"action\": \"show_text\", \"contents\": %s}}";
 
-    private KeybindInsertion() {}
+    private ElementInsertion() {}
 
     public record Result(String text, int cursor) {}
 
@@ -39,8 +39,8 @@ public final class KeybindInsertion {
         return splice(text, lineStart, lineEnd, plainToJson.apply(marked));
     }
 
-    public static String element(String keyName, String defaultKey) {
-        return ELEMENT.formatted(new JsonPrimitive(keyName), new JsonPrimitive("Default: " + defaultKey));
+    public static String keybind(String keyName, String defaultKey) {
+        return KEYBIND.formatted(new JsonPrimitive(keyName), new JsonPrimitive("Default: " + defaultKey));
     }
 
     private static Result splice(String text, int from, int to, String replacement) {

@@ -40,3 +40,17 @@ type="optional"
 versionRange="[0,)"
 ordering="NONE"
 side="CLIENT"
+
+[[dependencies.${mod_id}]]
+modId="guideme"
+type="optional"
+versionRange="[0,)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.${mod_id}]]
+modId="patchouli"
+type="optional"
+versionRange="[0,)"
+ordering="NONE"
+side="CLIENT"
