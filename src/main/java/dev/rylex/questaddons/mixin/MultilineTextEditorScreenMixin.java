@@ -3,6 +3,7 @@ package dev.rylex.questaddons.mixin;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.ftb.mods.ftblibrary.ui.MultilineTextBox;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
@@ -21,9 +22,11 @@ import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = MultilineTextEditorScreen.class, remap = false)
 public abstract class MultilineTextEditorScreenMixin implements DescriptionEditor {
@@ -35,9 +38,19 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     @Final
     private Map<Integer, Runnable> hotKeys;
 
+    @Unique
+    private InsertContext questaddons$insertContext;
+
     @Inject(method = "<init>", at = @At("RETURN"))
     private void questaddons$registerFixJsonHotkey(CallbackInfo ci) {
         hotKeys.put(GLFW.GLFW_KEY_F, this::questaddons$fixJson);
+    }
+
+    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    private void questaddons$closePromptOnEscape(Key key, CallbackInfoReturnable<Boolean> cir) {
+        if (key.esc() && questaddons$insertContext != null && questaddons$insertContext.dismissPrompt()) {
+            cir.setReturnValue(true);
+        }
     }
 
     @Override
@@ -58,17 +71,20 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     }
 
     @Override
-    public void questaddons$insert(DescriptionInsert insert) {
+    public void questaddons$insert(DescriptionInsert insert, int anchorX, int anchorY) {
         MultilineTextBox.StringExtents selected = textBox.getSelected();
         int start = selected.start();
         int end = selected.end();
         String selection = textBox.getText().substring(start, end);
         textBox.setFocused(false);
-        insert.open(new InsertContext(
+        questaddons$insertContext = new InsertContext(
                 (BaseScreen) (Object) this,
+                anchorX,
+                anchorY,
                 selection.indexOf('\n') >= 0 ? "" : selection,
                 element -> questaddons$put(start, end, element),
-                () -> textBox.setFocused(true)));
+                () -> textBox.setFocused(true));
+        insert.open(questaddons$insertContext);
     }
 
     private void questaddons$put(int start, int end, String element) {
