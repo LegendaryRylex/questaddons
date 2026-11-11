@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.rylex.questaddons.client.DescriptionEditor;
 import dev.rylex.questaddons.client.DescriptionInsert;
 import dev.rylex.questaddons.client.EditorButton;
+import dev.rylex.questaddons.client.PreviewLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -35,7 +36,13 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
     private static final int CANCEL_ROOM = 21;
 
     @Unique
+    private static final int PREVIEW_ROOM = 18;
+
+    @Unique
     private final List<SimpleTextButton> questaddons$buttons = new ArrayList<>();
+
+    @Unique
+    private SimpleTextButton questaddons$previewButton;
 
     private MultilineTextEditorToolbarMixin(Panel panel) {
         super(panel);
@@ -63,6 +70,19 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                         insert.title(),
                         insert.tooltip())));
         questaddons$buttons.forEach(this::add);
+        DescriptionEditor editor = (DescriptionEditor) getGui();
+        questaddons$previewButton = null;
+        if (editor.questaddons$hasPreview()) {
+            questaddons$previewButton = new EditorButton(
+                    this,
+                    (PreviewLayout.shown() ? Icons.VISIBILITY_HIDE : Icons.VISIBILITY_SHOW).withPadding(2),
+                    button -> editor.questaddons$togglePreview(),
+                    Component.translatable("questaddons.gui.preview"),
+                    Component.translatable("questaddons.gui.preview.tooltip"),
+                    Component.translatable("questaddons.gui.preview.hotkey", modifier)
+                            .withStyle(ChatFormatting.DARK_GRAY));
+            add(questaddons$previewButton);
+        }
     }
 
     /** Finds convert and undo by position, the last two left-aligned buttons, since FTB Quests moves them between releases. */
@@ -79,7 +99,8 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
         Widget convert = leftAligned.get(leftAligned.size() - 2);
         Widget undo = leftAligned.getLast();
         int shift = questaddons$buttons.size() * BUTTON_SIZE;
-        boolean oneRow = undo.getPosX() + shift + BUTTON_SIZE + CANCEL_ROOM <= width;
+        int previewRoom = questaddons$previewButton != null ? PREVIEW_ROOM : 0;
+        boolean oneRow = undo.getPosX() + shift + BUTTON_SIZE + CANCEL_ROOM + previewRoom <= width;
         int x = oneRow ? convert.getPosX() + BUTTON_SIZE : SECOND_ROW_X;
         int y = oneRow ? 1 : ROW_HEIGHT + 1;
         for (SimpleTextButton button : questaddons$buttons) {
@@ -90,6 +111,9 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
             undo.setPos(undo.getPosX() + shift, undo.getPosY());
         } else {
             setHeight(ROW_HEIGHT * 2);
+        }
+        if (questaddons$previewButton != null) {
+            questaddons$previewButton.setPosAndSize(width - CANCEL_ROOM - BUTTON_SIZE + 2, 1, BUTTON_SIZE, BUTTON_SIZE);
         }
     }
 }
