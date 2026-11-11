@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.rylex.questaddons.client.DescriptionEditor;
 import dev.rylex.questaddons.client.DescriptionInsert;
 import dev.rylex.questaddons.client.EditorButton;
+import dev.rylex.questaddons.client.PreviewLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +42,13 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
     private static final int CANCEL_ROOM = 21;
 
     @Unique
+    private static final int PREVIEW_ROOM = 18;
+
+    @Unique
     private final List<SimpleTextButton> questaddons$buttons = new ArrayList<>();
+
+    @Unique
+    private SimpleTextButton questaddons$previewButton;
 
     private MultilineTextEditorToolbarMixin(Panel panel) {
         super(panel);
@@ -69,6 +76,19 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                         insert.title(),
                         insert.tooltip())));
         questaddons$buttons.forEach(this::add);
+        DescriptionEditor editor = (DescriptionEditor) getGui();
+        questaddons$previewButton = null;
+        if (editor.questaddons$hasPreview()) {
+            questaddons$previewButton = new EditorButton(
+                    this,
+                    (PreviewLayout.shown() ? Icons.VISIBILITY_HIDE : Icons.VISIBILITY_SHOW).withPadding(2),
+                    button -> editor.questaddons$togglePreview(),
+                    Component.translatable("questaddons.gui.preview"),
+                    Component.translatable("questaddons.gui.preview.tooltip"),
+                    Component.translatable("questaddons.gui.preview.hotkey", modifier)
+                            .withStyle(ChatFormatting.DARK_GRAY));
+            add(questaddons$previewButton);
+        }
     }
 
     @ModifyConstant(method = "alignWidgets", constant = @Constant(intValue = 223))
@@ -88,6 +108,9 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
         if (!oneRow) {
             setHeight(ROW_HEIGHT * 2);
         }
+        if (questaddons$previewButton != null) {
+            questaddons$previewButton.setPosAndSize(width - CANCEL_ROOM - BUTTON_SIZE + 2, 1, BUTTON_SIZE, BUTTON_SIZE);
+        }
     }
 
     @Unique
@@ -97,6 +120,7 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
 
     @Unique
     private boolean questaddons$fitsOneRow() {
-        return questaddons$undoX() + BUTTON_SIZE + CANCEL_ROOM <= width;
+        int previewRoom = questaddons$previewButton != null ? PREVIEW_ROOM : 0;
+        return questaddons$undoX() + BUTTON_SIZE + CANCEL_ROOM + previewRoom <= width;
     }
 }

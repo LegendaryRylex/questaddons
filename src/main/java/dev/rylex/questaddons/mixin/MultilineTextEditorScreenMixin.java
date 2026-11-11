@@ -1,8 +1,13 @@
 package dev.rylex.questaddons.mixin;
 
+import dev.ftb.mods.ftblibrary.config.ListConfig;
+import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.ftb.mods.ftblibrary.ui.MultilineTextBox;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.PanelScrollBar;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
@@ -11,8 +16,13 @@ import dev.rylex.questaddons.client.ComponentJson;
 import dev.rylex.questaddons.client.DescriptionEditor;
 import dev.rylex.questaddons.client.DescriptionInsert;
 import dev.rylex.questaddons.client.DescriptionJsonFixer;
+import dev.rylex.questaddons.client.DescriptionPreview;
 import dev.rylex.questaddons.client.ElementInsertion;
 import dev.rylex.questaddons.client.InsertContext;
+import dev.rylex.questaddons.client.PreviewDivider;
+import dev.rylex.questaddons.client.PreviewLayout;
+import dev.rylex.questaddons.client.PreviewTargets;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
@@ -38,12 +48,120 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     @Final
     private Map<Integer, Runnable> hotKeys;
 
+    @Shadow
+    @Final
+    private ListConfig<String, StringConfig> config;
+
+    @Shadow
+    @Final
+    private Panel outerPanel;
+
+    @Shadow
+    @Final
+    private Panel textBoxPanel;
+
+    @Shadow
+    @Final
+    private PanelScrollBar scrollBar;
+
+    @Unique
+    private static final int SCROLL_ROOM = 14;
+
     @Unique
     private InsertContext questaddons$insertContext;
+
+    @Unique
+    private DescriptionPreview questaddons$preview;
+
+    @Unique
+    private PreviewDivider questaddons$divider;
+
+    @Unique
+    private int questaddons$savedCursor;
+
+    @Unique
+    private double questaddons$savedScroll;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void questaddons$registerFixJsonHotkey(CallbackInfo ci) {
         hotKeys.put(GLFW.GLFW_KEY_F, this::questaddons$fixJson);
+        PreviewTargets.Target target = PreviewTargets.find(config);
+        if (target == null) {
+            return;
+        }
+        questaddons$preview = new DescriptionPreview(outerPanel, target.quest(), target.viewWidth(), textBox);
+        questaddons$divider =
+                new PreviewDivider(outerPanel, this::questaddons$dragDivider, () -> textBox.setFocused(true));
+        hotKeys.put(GLFW.GLFW_KEY_V, this::questaddons$togglePreview);
+    }
+
+    @Inject(method = "alignWidgets", at = @At("HEAD"))
+    private void questaddons$saveTextView(CallbackInfo ci) {
+        questaddons$savedCursor = textBox.cursorPos();
+        questaddons$savedScroll = textBoxPanel.getScrollY();
+    }
+
+    @Inject(method = "alignWidgets", at = @At("TAIL"))
+    private void questaddons$splitForPreview(CallbackInfo ci) {
+        if (questaddons$previewShown()) {
+            int top = textBoxPanel.posY;
+            int height = textBoxPanel.height;
+            int area = questaddons$previewArea();
+            int previewWidth = PreviewLayout.previewWidth(area);
+            int textWidth = area - previewWidth;
+            textBoxPanel.setPosAndSize(2, top, textWidth, height);
+            textBoxPanel.alignWidgets();
+            scrollBar.setX(2 + textWidth + 2);
+            int dividerX = 2 + textWidth + SCROLL_ROOM;
+            questaddons$divider.setPosAndSize(dividerX, top, PreviewLayout.DIVIDER, height);
+            questaddons$preview.setPosAndSize(dividerX + PreviewLayout.DIVIDER, top, previewWidth, height);
+        }
+        ((PanelAccessor) textBoxPanel).questaddons$setContentHeight(-1);
+        textBox.seekCursor(
+                Whence.ABSOLUTE,
+                Math.min(questaddons$savedCursor, textBox.getText().length()));
+        textBoxPanel.setScrollY(Math.max(0, Math.min(questaddons$savedScroll, textBox.height - textBoxPanel.height)));
+    }
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void questaddons$refreshTextHeight(CallbackInfo ci) {
+        ((PanelAccessor) textBoxPanel).questaddons$setContentHeight(-1);
+    }
+
+    @Unique
+    private boolean questaddons$previewShown() {
+        return questaddons$preview != null && PreviewLayout.shown();
+    }
+
+    @Unique
+    private int questaddons$previewArea() {
+        return ((Widget) (Object) this).width - 4 - SCROLL_ROOM - PreviewLayout.DIVIDER;
+    }
+
+    @Unique
+    private void questaddons$dragDivider(int mouseX) {
+        int right = outerPanel.getX() + ((Widget) (Object) this).width - 2;
+        PreviewLayout.dragTo(right - mouseX - PreviewLayout.DIVIDER / 2, questaddons$previewArea());
+        ((BaseScreen) (Object) this).alignWidgets();
+    }
+
+    @Override
+    public boolean questaddons$hasPreview() {
+        return questaddons$preview != null;
+    }
+
+    @Override
+    public void questaddons$togglePreview() {
+        if (questaddons$preview == null) {
+            return;
+        }
+        PreviewLayout.toggle();
+        ((BaseScreen) (Object) this).refreshWidgets();
+    }
+
+    @Override
+    public List<Widget> questaddons$previewWidgets() {
+        return questaddons$previewShown() ? List.of(questaddons$preview, questaddons$divider) : List.of();
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
