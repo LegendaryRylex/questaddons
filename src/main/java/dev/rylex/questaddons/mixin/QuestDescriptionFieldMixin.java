@@ -1,5 +1,9 @@
 package dev.rylex.questaddons.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import dev.rylex.questaddons.client.ItemLinkTooltip;
+import dev.rylex.questaddons.client.ItemRecipeClick;
+import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.Commands;
@@ -15,9 +19,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class QuestDescriptionFieldMixin {
     @Inject(method = "handleCustomClickEvent", at = @At("HEAD"), cancellable = true)
     private void questaddons$runVanillaClicks(Style style, CallbackInfoReturnable<Boolean> cir) {
-        if (questaddons$run(style.getClickEvent())) {
+        if (ItemRecipeClick.show(style) || questaddons$run(style.getClickEvent())) {
             cir.setReturnValue(true);
         }
+    }
+
+    @ModifyExpressionValue(
+            method = "addMouseOverText",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Ldev/ftb/mods/ftbquests/client/gui/quests/ViewQuestPanel$QuestDescriptionField;getClickableStyleAt(Ldev/ftb/mods/ftblibrary/client/gui/theme/Theme;II)Ljava/util/Optional;"))
+    private Optional<Style> questaddons$markItemTooltip(Optional<Style> style) {
+        ItemLinkTooltip.hover(style);
+        return style;
     }
 
     @Unique
