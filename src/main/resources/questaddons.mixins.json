@@ -17,6 +17,7 @@
     "QuestAccessor",
     "QuestButtonMixin",
     "QuestDescriptionConfigMixin",
+    "QuestDescriptionFieldMixin",
     "QuestObjectButtonMixin",
     "QuestPanelMixin",
     "QuestScreenAccessor",
