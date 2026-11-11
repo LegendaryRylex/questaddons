@@ -13,6 +13,7 @@
     "NetClientSplitMixin",
     "QuestAccessor",
     "QuestButtonMixin",
+    "QuestDescriptionFieldMixin",
     "QuestPanelMixin",
     "QuestScreenAccessor",
     "QuestScreenFilterMixin",

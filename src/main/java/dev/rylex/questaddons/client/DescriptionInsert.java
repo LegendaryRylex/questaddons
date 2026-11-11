@@ -3,6 +3,7 @@ package dev.rylex.questaddons.client;
 import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.rylex.questaddons.compat.guideme.GuideMeCompat;
 import dev.rylex.questaddons.compat.patchouli.PatchouliCompat;
@@ -19,6 +20,7 @@ import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 
 public enum DescriptionInsert {
     KEYBIND("keybind", () -> Icons.KEYBOARD) {
@@ -39,6 +41,27 @@ public enum DescriptionInsert {
             context.pickItem(stack -> context.put(context.label(stack.getHoverName())
                     .withStyle(style -> style.withHoverEvent(
                             new HoverEvent.ShowItem(ItemStackTemplate.fromNonEmptyStack(stack))))));
+        }
+    },
+    COMMAND("command", () -> ItemIcon.ofItem(Items.COMMAND_BLOCK)) {
+        @Override
+        public void open(InsertContext context) {
+            context.prompt(prompt(), "/", typed -> {
+                String command = typed.startsWith("/") ? typed : "/" + typed;
+                context.put(context.label(command).withStyle(style -> style.withUnderlined(true)
+                        .withClickEvent(new ClickEvent.RunCommand(command))));
+            });
+        }
+    },
+    COPY("copy", () -> Icons.NOTES) {
+        @Override
+        public void open(InsertContext context) {
+            context.prompt(
+                    prompt(),
+                    context.selection(),
+                    value -> context.put(context.label(value).withStyle(style -> style.withUnderlined(true)
+                            .withClickEvent(new ClickEvent.CopyToClipboard(value))
+                            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.copy.click"))))));
         }
     },
     FONT("font", () -> Icons.FEATHER) {
