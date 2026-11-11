@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.rylex.questaddons.client.DescriptionEditor;
 import dev.rylex.questaddons.client.DescriptionInsert;
+import dev.rylex.questaddons.client.EditorButton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -44,9 +45,8 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
     private void questaddons$addButtons(CallbackInfo ci) {
         questaddons$buttons.clear();
         String modifier = Util.getPlatform() == Util.OS.OSX ? "Ctrl" : "Alt";
-        questaddons$buttons.add(SimpleTextButton.create(
+        questaddons$buttons.add(new EditorButton(
                 this,
-                Component.empty(),
                 Icons.CHECK.withPadding(2),
                 button -> ((DescriptionEditor) getGui()).questaddons$fixJson(),
                 Component.translatable("questaddons.gui.fix_json"),
@@ -55,11 +55,11 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                         .withStyle(ChatFormatting.DARK_GRAY)));
         Arrays.stream(DescriptionInsert.values())
                 .filter(DescriptionInsert::isAvailable)
-                .forEach(insert -> questaddons$buttons.add(SimpleTextButton.create(
+                .forEach(insert -> questaddons$buttons.add(new EditorButton(
                         this,
-                        Component.empty(),
                         insert.icon().withPadding(2),
-                        button -> ((DescriptionEditor) getGui()).questaddons$insert(insert),
+                        button -> ((DescriptionEditor) getGui())
+                                .questaddons$insert(insert, button.getX(), button.getY() + button.height),
                         insert.title(),
                         insert.tooltip())));
         questaddons$buttons.forEach(this::add);
