@@ -39,7 +39,7 @@ public abstract class BaseScreenSplitMixin {
     }
 
     @WrapOperation(
-            method = "drawForeground",
+            method = "drawModalPanels",
             at =
                     @At(
                             value = "INVOKE",

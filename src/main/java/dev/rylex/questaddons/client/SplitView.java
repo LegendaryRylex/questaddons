@@ -193,6 +193,7 @@ public final class SplitView {
         QuestObjectBase previous = QuestTheme.setFallbackQuestObject(selectedChapter(current));
         current.draw(graphics, theme, current.getX(), current.getY(), current.width, current.height);
         current.drawForeground(graphics, theme, current.getX(), current.getY(), current.width, current.height);
+        current.drawModalPanels(graphics, theme);
         QuestTheme.setFallbackQuestObject(previous);
 
         int position = draggingDivider ? clampedSplit(screen, dragFraction) : splitPos(screen);

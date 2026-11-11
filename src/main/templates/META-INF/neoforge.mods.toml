@@ -35,6 +35,13 @@ ordering="AFTER"
 side="CLIENT"
 
 [[dependencies.${mod_id}]]
+modId="ftblibrary"
+type="required"
+versionRange="${ftb_library_version_range}"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.${mod_id}]]
 modId="ftbfiltersystem"
 type="optional"
 versionRange="[0,)"
