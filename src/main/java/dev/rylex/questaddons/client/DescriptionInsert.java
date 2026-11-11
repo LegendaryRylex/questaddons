@@ -24,12 +24,6 @@ public enum DescriptionInsert {
             context.menu(KeybindMenu.items(context::put));
         }
     },
-    TRANSLATION("translation", () -> Icons.GLOBE) {
-        @Override
-        public void open(InsertContext context) {
-            context.prompt(prompt(), "", key -> context.put(Component.translatable(key)));
-        }
-    },
     HOVER_TEXT("hover_text", () -> Icons.INFO) {
         @Override
         public void open(InsertContext context) {
