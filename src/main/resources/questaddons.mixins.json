@@ -29,6 +29,7 @@
     "ScreenWrapperSplitMixin",
     "TaskAccessor",
     "TaskButtonMixin",
+    "TextBoxRetypeSelectionMixin",
     "ViewQuestPanelMixin"
   ],
   "injectors": {
