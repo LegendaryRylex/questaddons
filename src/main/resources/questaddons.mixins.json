@@ -19,6 +19,7 @@
     "QuestDescriptionFieldMixin",
     "QuestPanelMixin",
     "QuestScreenAccessor",
+    "QuestScreenArrowMoveMixin",
     "QuestScreenFilterMixin",
     "QuestScreenMixin",
     "QuestScreenSaveMixin",
