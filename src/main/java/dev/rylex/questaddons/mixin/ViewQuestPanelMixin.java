@@ -8,23 +8,31 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.BlankPanel;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.ColorWidget;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.SimpleButton;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.rylex.questaddons.client.ClickGestureGuard;
 import dev.rylex.questaddons.client.DependencyHighlight;
+import dev.rylex.questaddons.client.DependencyPanels;
 import dev.rylex.questaddons.client.FloatingQuestPanel;
 import dev.rylex.questaddons.client.PreviewTargets;
 import dev.rylex.questaddons.client.QuestCollapse;
 import dev.rylex.questaddons.client.QuestWindows;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -91,7 +99,9 @@ public abstract class ViewQuestPanelMixin {
             QuestWindows.raise(floating);
         }
 
-        if (!button.isLeft() || self.getMouseY() >= panelContent.getY()) {
+        if (!button.isLeft()
+                || self.getMouseY() >= panelContent.getY()
+                || DependencyPanels.isOver(self, self.getMouseX(), self.getMouseY())) {
             return;
         }
 
@@ -106,14 +116,34 @@ public abstract class ViewQuestPanelMixin {
     }
 
     @Inject(method = "addWidgets", at = @At("TAIL"))
-    private void questaddons$addCollapseButton(CallbackInfo ci) {
-        if (quest == null || panelContent == null) {
-            return;
-        }
-
+    private void questaddons$afterWidgets(CallbackInfo ci) {
         ViewQuestPanel self = (ViewQuestPanel) (Object) this;
+        if (quest != null && panelContent != null) {
+            questaddons$addCollapseButton(self);
+            questaddons$addKeepButton(self);
+            questaddons$replaceDependenciesButton(self);
+            questaddons$replaceDependantsButton(self);
+        }
+        DependencyPanels.attach(self);
+    }
+
+    @Inject(method = "checkMouseOver", at = @At("RETURN"), cancellable = true)
+    private void questaddons$includeDependencyPanel(int mouseX, int mouseY, CallbackInfoReturnable<Boolean> cir) {
+        if (!cir.getReturnValue() && quest != null) {
+            ViewQuestPanel self = (ViewQuestPanel) (Object) this;
+            if (DependencyPanels.isOver(self, mouseX, mouseY)) {
+                cir.setReturnValue(true);
+            }
+        }
+    }
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void questaddons$tickDependencyPanel(CallbackInfo ci) {
+        DependencyPanels.tick((ViewQuestPanel) (Object) this);
+    }
+
+    private static int questaddons$headerLeft(ViewQuestPanel self) {
         int left = self.width;
-        int size = 0;
         for (Widget widget : self.getWidgets()) {
             if (widget instanceof Button
                     && widget.shouldDraw()
@@ -121,9 +151,113 @@ public abstract class ViewQuestPanelMixin {
                     && widget.posX > self.width / 2
                     && widget.posX < left) {
                 left = widget.posX;
-                size = widget.width;
             }
         }
+        return left;
+    }
+
+    private static int questaddons$headerSize(ViewQuestPanel self) {
+        for (Widget widget : self.getWidgets()) {
+            if (widget instanceof Button && widget.shouldDraw() && widget.posY == 4 && widget.posX > self.width / 2) {
+                return widget.width;
+            }
+        }
+        return 0;
+    }
+
+    private void questaddons$addKeepButton(ViewQuestPanel self) {
+        int size = questaddons$headerSize(self);
+        if (size == 0 || ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1) {
+            return;
+        }
+
+        boolean floating = self instanceof FloatingQuestPanel;
+        String key = floating ? "questaddons.gui.release_window" : "questaddons.gui.keep_window";
+        SimpleButton keep =
+                new SimpleButton(
+                        self, Component.translatable(key), floating ? Icons.LOCK : Icons.LOCK_OPEN, (button, mouse) -> {
+                            if (!mouse.isLeft()) {
+                                return;
+                            }
+                            if (self instanceof FloatingQuestPanel panel) {
+                                QuestWindows.release(panel);
+                            } else {
+                                QuestWindows.keep(self);
+                            }
+                        }) {
+                    @Override
+                    public void addMouseOverText(TooltipList list) {
+                        super.addMouseOverText(list);
+                        list.add(Component.translatable(key + ".tooltip").withStyle(ChatFormatting.GRAY));
+                    }
+                };
+        keep.setPosAndSize(questaddons$headerLeft(self) - size - 2, 4, size, size);
+        self.add(keep);
+    }
+
+    private void questaddons$replaceDependantsButton(ViewQuestPanel self) {
+        if (quest.getDependants().isEmpty()) {
+            return;
+        }
+
+        List<Widget> widgets = self.getWidgets();
+        for (int index = 0; index < widgets.size(); index++) {
+            if (widgets.get(index) instanceof Button original
+                    && original.getTitle().getContents() instanceof TranslatableContents contents
+                    && contents.getKey().equals("ftbquests.gui.view_dependants")) {
+                Quest viewed = quest;
+                SimpleButton replacement = new SimpleButton(
+                        self,
+                        original.getTitle(),
+                        Icon.getIcon("ftbquests:textures/gui/arrow_right.png")
+                                .withTint((Color4I) ThemeProperties.QUEST_VIEW_TITLE.get(viewed)),
+                        (button, mouse) -> questaddons$showDependants(self, viewed));
+                replacement.setPosAndSize(original.posX, original.posY, original.width, original.height);
+                widgets.set(index, replacement);
+                return;
+            }
+        }
+    }
+
+    private static void questaddons$showDependants(ViewQuestPanel self, Quest viewed) {
+        ClientQuestFile file = ClientQuestFile.INSTANCE;
+        if (file == null) {
+            return;
+        }
+
+        Collection<QuestObject> dependants = viewed.getDependants();
+        List<ContextMenuItem> menu = new ArrayList<>();
+        int hidden = 0;
+        for (QuestObject object : dependants) {
+            if (!file.canEdit() && (file.selfTeamData == null || !object.isSearchable(file.selfTeamData))) {
+                hidden++;
+                continue;
+            }
+            MutableComponent title = object.getMutableTitle();
+            if (object.getQuestChapter() != null && object.getQuestChapter() != viewed.getQuestChapter()) {
+                title.append(Component.literal(" [")
+                        .append(object.getQuestChapter().getTitle())
+                        .append("]")
+                        .withStyle(ChatFormatting.GRAY));
+            }
+            menu.add(new ContextMenuItem(title, Color4I.empty(), button -> QuestWindows.openFrom(self, object)));
+        }
+
+        if (hidden > 0) {
+            MutableComponent prefix = hidden == dependants.size() ? Component.empty() : Component.literal("+ ");
+            menu.add(new ContextMenuItem(
+                            prefix.append(Component.translatable("ftbquests.quest.hidden_quests_footer", hidden)),
+                            Color4I.empty(),
+                            null)
+                    .setEnabled(false));
+        }
+
+        self.getGui().openContextMenu(menu);
+    }
+
+    private void questaddons$addCollapseButton(ViewQuestPanel self) {
+        int left = questaddons$headerLeft(self);
+        int size = questaddons$headerSize(self);
         if (size == 0) {
             return;
         }
@@ -173,14 +307,12 @@ public abstract class ViewQuestPanelMixin {
         self.setPos((self.getParent().width - self.width) / 2, (self.getParent().height - self.height) / 2);
     }
 
-    @Inject(method = "addWidgets", at = @At("TAIL"))
-    private void questaddons$highlightDependencies(CallbackInfo ci) {
+    private void questaddons$replaceDependenciesButton(ViewQuestPanel self) {
         Button original = buttonOpenDependencies;
-        if (quest == null || original == null || !quest.hasDependencies()) {
+        if (original == null || !quest.hasDependencies()) {
             return;
         }
 
-        ViewQuestPanel self = (ViewQuestPanel) (Object) this;
         List<Widget> widgets = self.getWidgets();
         int index = widgets.indexOf(original);
         if (index < 0) {
@@ -193,9 +325,7 @@ public abstract class ViewQuestPanelMixin {
         SimpleButton replacement =
                 new SimpleButton(self, original.getTitle(), icon, (button, mouse) -> {
                     if (mouse.isRight()) {
-                        ((ViewQuestPanelAccessor) self)
-                                .questaddons$showList(
-                                        viewed.streamDependencies().toList(), true);
+                        DependencyPanels.toggle(self);
                     } else {
                         DependencyHighlight.toggle(self);
                     }
@@ -207,8 +337,10 @@ public abstract class ViewQuestPanelMixin {
                                 ? "questaddons.gui.view_dependencies.unhighlight"
                                 : "questaddons.gui.view_dependencies.highlight";
                         list.add(Component.translatable(hint).withStyle(ChatFormatting.GRAY));
-                        list.add(Component.translatable("questaddons.gui.view_dependencies.list")
-                                .withStyle(ChatFormatting.GRAY));
+                        String panel = DependencyPanels.isOpen(self)
+                                ? "questaddons.gui.view_dependencies.hide_panel"
+                                : "questaddons.gui.view_dependencies.show_panel";
+                        list.add(Component.translatable(panel).withStyle(ChatFormatting.GRAY));
                     }
                 };
         replacement.setPosAndSize(original.posX, original.posY, original.width, original.height);

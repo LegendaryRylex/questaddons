@@ -72,8 +72,10 @@ public final class FloatingQuestPanel extends ViewQuestPanel {
     }
 
     private void applyPosition() {
-        floatX = Mth.clamp(floatX, 0, Math.max(0, screen.width - width));
-        floatY = Mth.clamp(floatY, 0, Math.max(0, screen.height - height));
+        int left = DependencyPanels.leftExtent(this);
+        int groupHeight = Math.max(height, DependencyPanels.height(this));
+        floatX = Mth.clamp(floatX, left, Math.max(left, screen.width - width));
+        floatY = Mth.clamp(floatY, 0, Math.max(0, screen.height - groupHeight));
         setPos(floatX, floatY);
     }
 

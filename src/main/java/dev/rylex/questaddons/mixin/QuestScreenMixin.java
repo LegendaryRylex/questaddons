@@ -70,6 +70,11 @@ public abstract class QuestScreenMixin {
         QuestWindows.addTo((QuestScreen) (Object) this);
     }
 
+    @Inject(method = "onClosed", at = @At("HEAD"))
+    private void questaddons$saveFloatingWindows(CallbackInfo ci) {
+        QuestWindows.save((QuestScreen) (Object) this);
+    }
+
     @Inject(
             method = {"refreshViewQuestPanel", "selectChapter"},
             at = @At("TAIL"))
