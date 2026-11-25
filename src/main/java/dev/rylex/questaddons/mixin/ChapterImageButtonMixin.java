@@ -9,7 +9,6 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.rylex.questaddons.client.ClickGestureGuard;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
-import java.util.List;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,24 +49,6 @@ public abstract class ChapterImageButtonMixin {
         ((Widget) (Object) this).playClickSound();
         accessor.questaddons$setMovingObjects(true);
         ClickGestureGuard.arm(QuestAddonsKeys.MOVE_SELECTION);
-        questaddons$consumedClick = true;
-        ci.cancel();
-    }
-
-    @Inject(method = "onClicked", at = @At("HEAD"), cancellable = true)
-    private void questaddons$deleteObject(MouseButton button, CallbackInfo ci) {
-        if (!button.isLeft() || !QuestAddonsKeys.isDeleteObjectHeld()) {
-            return;
-        }
-
-        ClientQuestFile file = ClientQuestFile.INSTANCE;
-        if (file == null || !file.canEdit()) {
-            return;
-        }
-
-        ((Widget) (Object) this).playClickSound();
-        ClickGestureGuard.arm(QuestAddonsKeys.DELETE_OBJECT);
-        file.deleteObjects(List.of(chapterImage.getId()));
         questaddons$consumedClick = true;
         ci.cancel();
     }
