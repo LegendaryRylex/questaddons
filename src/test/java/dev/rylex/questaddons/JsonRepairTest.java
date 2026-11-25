@@ -143,6 +143,19 @@ class JsonRepairTest {
         assertEquals(expected, repair(line));
     }
 
+    @ParameterizedTest
+    @CsvSource(
+            delimiter = '|',
+            quoteCharacter = '`',
+            value = {
+                "[{\"text\":\"{image:a.png}\"},{\"text\":\"{\\\"text\\\": \\\"{image:a.png}\",\"underlined\":true},\"b\"]|[{\"text\":\"{image:a.png}\",\"underlined\":true},\"b\"]",
+                "[\"a\",{\"text\":\"{\\\"text\\\": \\\"b\\\"}\",\"bold\":true}]|[\"a\",{\"text\":\"b\",\"bold\":true}]",
+                "{\"text\":\"{\\\"text\\\": \\\"say \\\\\\\"hi\\\\\\\"\",\"bold\":true}|{\"text\":\"say \\\"hi\\\"\",\"bold\":true}"
+            })
+    void unwrapsTextThatSwallowedItsOwnElement(String line, String expected) {
+        assertEquals(expected, repair(line));
+    }
+
     @Test
     void rejectsUnrecoverableSyntax() {
         assertTrue(LenientJson.parse("{\"text\":}").isEmpty());

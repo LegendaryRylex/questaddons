@@ -3,13 +3,17 @@ package dev.rylex.questaddons.client;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class ComponentJsonRepair {
     private static final String CLICK_EVENT = "clickEvent";
@@ -37,6 +41,8 @@ public final class ComponentJsonRepair {
             "white");
     private static final List<String> CLICK_VALUE_KEYS = List.of("url", "command", "page", "path");
     private static final Map<String, String> KEYS = new HashMap<>();
+    private static final Pattern STRAY_WRAPPER =
+            Pattern.compile("\\{\\s*\"text\"\\s*:\\s*\"(.*?)(?:\"\\s*\\})?", Pattern.DOTALL);
 
     static {
         for (String key : List.of(
@@ -122,11 +128,57 @@ public final class ComponentJsonRepair {
             if (array.isEmpty()) {
                 return new JsonPrimitive("");
             }
+            List<JsonElement> elements = new ArrayList<>();
+            array.forEach(element -> {
+                Optional<JsonObject> unwrapped = strayWrapper(element);
+                if (unwrapped.isPresent() && !elements.isEmpty() && plainCopyOf(elements.getLast(), unwrapped.get())) {
+                    elements.removeLast();
+                }
+                elements.add(unwrapped.map(JsonElement.class::cast).orElse(element));
+            });
             JsonArray out = new JsonArray();
-            array.forEach(element -> splice(out, element, true));
+            elements.forEach(element -> splice(out, element, true));
             return out.isEmpty() ? new JsonPrimitive("") : out;
         }
-        return object(json.getAsJsonObject());
+        return object(strayWrapper(json).orElse(json.getAsJsonObject()));
+    }
+
+    private static Optional<JsonObject> strayWrapper(JsonElement element) {
+        if (!element.isJsonObject()
+                || !element.getAsJsonObject().has("text")
+                || !isString(element.getAsJsonObject().get("text"))) {
+            return Optional.empty();
+        }
+        Matcher matcher =
+                STRAY_WRAPPER.matcher(element.getAsJsonObject().get("text").getAsString());
+        if (!matcher.matches()) {
+            return Optional.empty();
+        }
+        JsonObject unwrapped = element.getAsJsonObject().deepCopy();
+        unwrapped.addProperty("text", unescaped(matcher.group(1)));
+        return Optional.of(unwrapped);
+    }
+
+    private static String unescaped(String raw) {
+        try {
+            return JsonParser.parseString("\"" + raw + "\"").getAsString();
+        } catch (RuntimeException e) {
+            return raw;
+        }
+    }
+
+    private static boolean plainCopyOf(JsonElement previous, JsonObject styled) {
+        JsonObject plain;
+        if (isString(previous)) {
+            plain = new JsonObject();
+            plain.add("text", previous);
+        } else if (previous.isJsonObject()) {
+            plain = previous.getAsJsonObject();
+        } else {
+            return false;
+        }
+        return plain.has("text")
+                && plain.entrySet().stream().allMatch(entry -> entry.getValue().equals(styled.get(entry.getKey())));
     }
 
     private static JsonElement legacy(String text) {
