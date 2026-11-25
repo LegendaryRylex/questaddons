@@ -1,5 +1,7 @@
 package dev.rylex.questaddons.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.ftb.mods.ftblibrary.config.ListConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -10,10 +12,12 @@ import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.ColorWidget;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.SimpleButton;
+import dev.ftb.mods.ftblibrary.ui.TextField;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -23,6 +27,8 @@ import dev.rylex.questaddons.client.ClickGestureGuard;
 import dev.rylex.questaddons.client.DependencyHighlight;
 import dev.rylex.questaddons.client.DependencyPanels;
 import dev.rylex.questaddons.client.FloatingQuestPanel;
+import dev.rylex.questaddons.client.InlineImages;
+import dev.rylex.questaddons.client.InlineTextField;
 import dev.rylex.questaddons.client.PreviewTargets;
 import dev.rylex.questaddons.client.QuestCollapse;
 import dev.rylex.questaddons.client.QuestWindows;
@@ -57,6 +63,36 @@ public abstract class ViewQuestPanelMixin {
 
     @Shadow
     private BlankPanel panelText;
+
+    @WrapOperation(
+            method = "addDescriptionText",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Ldev/ftb/mods/ftbquests/client/gui/quests/ViewQuestPanel;findImageComponent(Lnet/minecraft/network/chat/Component;)Ldev/ftb/mods/ftblibrary/util/client/ImageComponent;"))
+    private ImageComponent questaddons$onlyImageLines(
+            ViewQuestPanel self, Component line, Operation<ImageComponent> original) {
+        ImageComponent image = original.call(self, line);
+        return image != null && InlineImages.isImageOnly(line) ? image : null;
+    }
+
+    @WrapOperation(
+            method = "addDescriptionText",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Ldev/ftb/mods/ftblibrary/ui/TextField;setText(Lnet/minecraft/network/chat/Component;)Ldev/ftb/mods/ftblibrary/ui/TextField;"))
+    private TextField questaddons$layOutInlineImages(TextField field, Component text, Operation<TextField> original) {
+        TextField result = original.call(field, text);
+        if (InlineImages.hasImages(text)) {
+            ((InlineTextField) field)
+                    .questaddons$setInline(InlineImages.layout(
+                            text, field.getGui().getTheme().getFont(), field.maxWidth, field.textSpacing));
+        }
+        return result;
+    }
 
     @ModifyVariable(method = "editDescription", at = @At("STORE"), ordinal = 0)
     private ListConfig<String, StringConfig> questaddons$trackDescription(ListConfig<String, StringConfig> config) {

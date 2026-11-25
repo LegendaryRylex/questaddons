@@ -155,8 +155,10 @@ public final class DescriptionPreview extends Widget {
                 Component component = parsed.computeIfAbsent(
                         lines.get(i), raw -> TextUtils.parseRawText(raw, FTBQuestsClient.holderLookup()));
                 ImageComponent image = findImage(component);
-                if (image != null) {
+                if (image != null && InlineImages.isImageOnly(component)) {
                     y += addImage(image, y, textWidth) + 1;
+                } else if (InlineImages.hasImages(component)) {
+                    y += addInline(InlineImages.layout(component, theme.getFont(), textWidth, LINE), y) + 1;
                 } else {
                     List<FormattedText> wrapped = theme.listFormattedStringToWidth(component, textWidth);
                     for (int l = 0; l < wrapped.size(); l++) {
@@ -229,6 +231,18 @@ public final class DescriptionPreview extends Widget {
         }
         pieces.add(new IconPiece(image.getImage(), left, y, w, h));
         return h;
+    }
+
+    private int addInline(InlineImages.Layout layout, int y) {
+        for (InlineImages.Line line : layout.lines()) {
+            for (InlineImages.Run run : line.runs()) {
+                pieces.add(new TextPiece(run.text(), run.x(), y + line.y() + line.textY()));
+            }
+        }
+        for (InlineImages.Placed image : layout.images()) {
+            pieces.add(new IconPiece(image.icon(), image.x(), y + image.y(), image.width(), image.height()));
+        }
+        return layout.height();
     }
 
     @Nullable

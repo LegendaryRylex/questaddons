@@ -36,6 +36,7 @@
     "TaskAccessor",
     "TaskButtonMixin",
     "TextBoxRetypeSelectionMixin",
+    "TextFieldMixin",
     "ViewQuestPanelMixin"
   ],
   "injectors": {
