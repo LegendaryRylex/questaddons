@@ -2,6 +2,7 @@ package dev.rylex.questaddons.mixin;
 
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.rylex.questaddons.client.QuestWindows;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,6 +15,13 @@ public abstract class BaseScreenQuestWindowsMixin {
     @Inject(method = "mousePressed", at = @At("HEAD"))
     private void questaddons$dropStaleWindowDrag(MouseButton button, CallbackInfoReturnable<Boolean> cir) {
         QuestWindows.endDrag();
+    }
+
+    @Inject(method = "closeGui(Z)V", at = @At("TAIL"))
+    private void questaddons$forgetWindowsOnExit(boolean openPrevScreen, CallbackInfo ci) {
+        if ((Object) this instanceof QuestScreen screen) {
+            QuestWindows.forget(screen);
+        }
     }
 
     @Inject(method = "mouseReleased", at = @At("HEAD"))
