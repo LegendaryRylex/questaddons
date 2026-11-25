@@ -15,8 +15,8 @@ public final class ElementInsertion {
     public static Result insert(String text, int start, int end, String element, UnaryOperator<String> plainToJson) {
         int selectionEnd = text.substring(start, end).contains("\n") ? start : end;
         int lineStart = text.lastIndexOf('\n', start - 1) + 1;
-        int lineEnd = text.indexOf('\n', selectionEnd);
-        lineEnd = lineEnd < 0 ? text.length() : lineEnd;
+        int newline = text.indexOf('\n', selectionEnd);
+        int lineEnd = newline < 0 ? text.length() : newline;
         String line = text.substring(lineStart, lineEnd);
         String trimmed = line.trim();
 
@@ -25,15 +25,27 @@ public final class ElementInsertion {
         }
         boolean component = ComponentJsonRepair.looksLikeComponent(trimmed);
         if (component && trimmed.startsWith("[") && trimmed.endsWith("]")) {
-            Result inserted = intoArray(line, start - lineStart, selectionEnd - lineStart, element);
+            int from = start - lineStart;
+            int to = selectionEnd - lineStart;
+            Result inserted =
+                    SelectionStyling.apply(line, from, to, element).orElseGet(() -> intoArray(line, from, to, element));
             return new Result(
                     text.substring(0, lineStart) + inserted.text() + text.substring(lineEnd),
                     lineStart + inserted.cursor());
         }
         if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-            return component
-                    ? splice(text, lineStart, lineEnd, "[ " + trimmed + ", " + element + " ]")
-                    : splice(text, lineEnd, lineEnd, "\n" + element);
+            if (!component) {
+                return splice(text, lineEnd, lineEnd, "\n" + element);
+            }
+            int shift = "[ ".length() - line.indexOf(trimmed);
+            String bracketed = "[ " + trimmed + " ]";
+            int from = Math.max(0, start - lineStart + shift);
+            int to = Math.min(bracketed.length(), Math.max(from, selectionEnd - lineStart + shift));
+            return SelectionStyling.apply(bracketed, from, to, element)
+                    .map(styled -> new Result(
+                            text.substring(0, lineStart) + styled.text() + text.substring(lineEnd),
+                            lineStart + styled.cursor()))
+                    .orElseGet(() -> splice(text, lineStart, lineEnd, "[ " + trimmed + ", " + element + " ]"));
         }
         String marked = line.substring(0, start - lineStart) + MARKER + line.substring(selectionEnd - lineStart);
         return splice(text, lineStart, lineEnd, plainToJson.apply(marked));
