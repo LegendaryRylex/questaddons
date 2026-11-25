@@ -19,10 +19,26 @@ public final class DependencyPanels {
         CLOSED
     }
 
+    public enum Filter {
+        ALL,
+        PENDING,
+        COMPLETED;
+
+        boolean matches(boolean satisfied) {
+            return this == ALL || satisfied == (this == COMPLETED);
+        }
+
+        Filter step(boolean forward) {
+            Filter[] all = values();
+            return all[(ordinal() + (forward ? 1 : all.length - 1)) % all.length];
+        }
+    }
+
     private static final int GAP = 6;
     private static final int MIN_WIDTH = 110;
     private static final int MAX_WIDTH = 170;
     private static final int CHECK_INTERVAL = 10;
+    private static final int MIN_HEIGHT = 60;
     private static final Map<ViewQuestPanel, State> STATES = new WeakHashMap<>();
 
     private DependencyPanels() {}
@@ -31,8 +47,10 @@ public final class DependencyPanels {
         private long questId;
         private Mode mode = Mode.AUTOMATIC;
         private boolean expanded;
-        private List<QuestObject> shown = List.of();
         private int ticks;
+
+        @Nullable
+        private Filter filter;
 
         @Nullable
         private QuestDependencyPanel panel;
@@ -43,6 +61,7 @@ public final class DependencyPanels {
         if (state.questId != quest.id) {
             state.questId = quest.id;
             state.mode = Mode.AUTOMATIC;
+            state.filter = null;
             state.panel = null;
         }
         return state;
@@ -73,8 +92,33 @@ public final class DependencyPanels {
 
         State state = state(view, quest);
         state.mode = state.expanded ? Mode.CLOSED : Mode.OPEN;
+        state.filter = null;
         view.refreshWidgets();
         view.updateMouseOver(view.getMouseX(), view.getMouseY());
+    }
+
+    static void stepFilter(ViewQuestPanel view, boolean forward) {
+        State state = STATES.get(view);
+        if (state == null || state.filter == null) {
+            return;
+        }
+
+        state.filter = state.filter.step(forward);
+        view.refreshWidgets();
+        view.updateMouseOver(view.getMouseX(), view.getMouseY());
+    }
+
+    static boolean copyView(ViewQuestPanel from, ViewQuestPanel to) {
+        State source = STATES.get(from);
+        Quest quest = to.getViewedQuest();
+        if (source == null || quest == null || source.questId != quest.id) {
+            return false;
+        }
+
+        State target = state(to, quest);
+        target.mode = source.mode;
+        target.filter = source.filter;
+        return true;
     }
 
     public static void attach(ViewQuestPanel view) {
@@ -90,8 +134,7 @@ public final class DependencyPanels {
         state.expanded = data != null
                 && quest.hasDependencies()
                 && ThemeProperties.FULL_SCREEN_QUEST.get(quest) != 1
-                && (state.mode == Mode.OPEN || state.mode == Mode.AUTOMATIC && hasUnmet(quest, data));
-        state.shown = state.expanded ? shown(quest, data, state.mode) : List.of();
+                && (state.mode == Mode.OPEN || state.mode == Mode.AUTOMATIC && autoOpens(quest, data));
         view.setOnlyRenderWidgetsInside(!state.expanded);
         if (!state.expanded) {
             return;
@@ -99,9 +142,19 @@ public final class DependencyPanels {
 
         int room = view.getParent().width - view.width - GAP - 10;
         int width = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, room));
-        QuestDependencyPanel panel = new QuestDependencyPanel(view, quest, state.shown);
+        List<QuestObject> dependencies = quest.streamDependencies().toList();
+        if (dependencies.size() <= 1) {
+            state.filter = Filter.ALL;
+        } else if (state.filter == null) {
+            state.filter = state.mode == Mode.AUTOMATIC ? Filter.PENDING : Filter.ALL;
+        }
+        QuestDependencyPanel panel = new QuestDependencyPanel(view, quest, dependencies, state.filter);
         view.add(panel);
-        panel.layout(width, view.getParent().height - 10);
+        int maxHeight = (view.getParent().height - 10) * 2 / 3;
+        if (view instanceof FloatingQuestPanel) {
+            maxHeight = Math.min(maxHeight, view.getParent().height - view.posY - 5);
+        }
+        panel.layout(width, Math.max(MIN_HEIGHT, maxHeight));
         panel.setPos(-width - GAP, 0);
         state.panel = panel;
 
@@ -127,9 +180,7 @@ public final class DependencyPanels {
             return;
         }
 
-        boolean stale = state.mode == Mode.AUTOMATIC
-                        && (state.expanded != hasUnmet(quest, data)
-                                || state.expanded && !state.shown.equals(shown(quest, data, state.mode)))
+        boolean stale = state.mode == Mode.AUTOMATIC && state.expanded != autoOpens(quest, data)
                 || state.panel != null && state.panel.needsRefresh();
         if (stale) {
             view.refreshWidgets();
@@ -176,13 +227,21 @@ public final class DependencyPanels {
         return file == null ? null : file.selfTeamData;
     }
 
-    private static boolean hasUnmet(Quest quest, TeamData data) {
-        return quest.hasDependencies() && !data.areDependenciesComplete(quest);
-    }
+    private static boolean autoOpens(Quest quest, TeamData data) {
+        if (!quest.hasDependencies() || data.isCompleted(quest)) {
+            return false;
+        }
 
-    private static List<QuestObject> shown(Quest quest, TeamData data, Mode mode) {
-        return quest.streamDependencies()
-                .filter(dependency -> mode != Mode.AUTOMATIC || !isSatisfied(quest, data, dependency))
-                .toList();
+        List<QuestObject> dependencies = quest.streamDependencies().toList();
+        long met = dependencies.stream()
+                .filter(dependency -> isSatisfied(quest, data, dependency))
+                .count();
+        if (quest.getMinRequiredDependencies() > 0) {
+            return met < Math.min(quest.getMinRequiredDependencies(), dependencies.size());
+        }
+        boolean onlyOne = ((QuestAccessor) (Object) quest)
+                .questaddons$dependencyRequirement()
+                .needOnlyOne();
+        return onlyOne ? met == 0 : met < dependencies.size();
     }
 }

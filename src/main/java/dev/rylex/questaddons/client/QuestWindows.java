@@ -347,9 +347,7 @@ public final class QuestWindows {
         }
 
         FloatingQuestPanel panel = new FloatingQuestPanel(screen, quest, source.posX, source.posY);
-        DependencyPanels.Mode mode = DependencyPanels.mode(source);
-        if (mode != DependencyPanels.Mode.AUTOMATIC) {
-            DependencyPanels.setMode(panel, mode);
+        if (DependencyPanels.copyView(source, panel)) {
             panel.refreshWidgets();
         }
         FLOATING.computeIfAbsent(screen, key -> new ArrayList<>()).add(panel);

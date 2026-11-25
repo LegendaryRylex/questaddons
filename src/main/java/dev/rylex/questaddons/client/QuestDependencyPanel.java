@@ -1,11 +1,13 @@
 package dev.rylex.questaddons.client;
 
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.BlankPanel;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.PanelScrollBar;
 import dev.ftb.mods.ftblibrary.ui.SimpleButton;
+import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.TextField;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
@@ -20,6 +22,8 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.rylex.questaddons.mixin.QuestAccessor;
 import java.util.List;
+import java.util.Locale;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -32,20 +36,23 @@ public final class QuestDependencyPanel extends Panel {
     private final ViewQuestPanel owner;
     private final Quest quest;
     private final List<QuestObject> dependencies;
+    private final DependencyPanels.Filter filter;
     private List<Entry> entries = List.of();
     private int requestedWidth;
     private int requestedHeight;
 
-    QuestDependencyPanel(ViewQuestPanel owner, Quest quest, List<QuestObject> dependencies) {
+    QuestDependencyPanel(
+            ViewQuestPanel owner, Quest quest, List<QuestObject> dependencies, DependencyPanels.Filter filter) {
         super(owner);
         this.owner = owner;
         this.quest = quest;
         this.dependencies = List.copyOf(dependencies);
+        this.filter = filter;
     }
 
     void layout(int width, int maxHeight) {
         requestedWidth = width;
-        requestedHeight = Math.min(MAX_HEIGHT, maxHeight * 2 / 3);
+        requestedHeight = Math.min(MAX_HEIGHT, maxHeight);
         refreshWidgets();
     }
 
@@ -68,20 +75,31 @@ public final class QuestDependencyPanel extends Panel {
         close.setPosAndSize(width - 18, 3, 14, 14);
         add(close);
 
-        TextField requirement = new TextField(this).setMaxWidth(width - 10).setText(requirementText());
-        requirement.setColor(Color4I.GRAY);
-        requirement.setPos(5, heading.posY + heading.height + 5);
-        add(requirement);
-        int contentTop = requirement.posY + requirement.height + 5;
+        entries = buildEntries();
+        int contentTop = heading.posY + heading.height + 5;
+        if (dependencies.size() > 1) {
+            SimpleTextButton toggle = SimpleTextButton.create(
+                    this,
+                    filterLabel(),
+                    Icon.empty(),
+                    mouse -> DependencyPanels.stepFilter(owner, !mouse.isRight()),
+                    requirementText().copy().withStyle(ChatFormatting.GRAY),
+                    Component.translatable("questaddons.gui.dependencies.filter.tooltip"));
+            toggle.setPosAndSize(4, contentTop, width - 8, 14);
+            add(toggle);
+            contentTop += toggle.height + 4;
+        }
 
         BlankPanel content = new BlankPanel(this);
         content.setPosAndSize(3, contentTop, width - 14, 1);
         add(content);
 
-        entries = buildEntries();
         int y = 0;
         int hidden = 0;
         for (Entry entry : entries) {
+            if (!filter.matches(entry.satisfied())) {
+                continue;
+            }
             if (!entry.visible()) {
                 hidden++;
                 continue;
@@ -102,6 +120,16 @@ public final class QuestDependencyPanel extends Panel {
             y += footer.height + 3;
         }
 
+        if (y == 0) {
+            TextField none = new TextField(content)
+                    .setMaxWidth(content.width - 4)
+                    .setText(Component.translatable("questaddons.gui.dependencies.none"));
+            none.setColor(Color4I.GRAY);
+            none.setPos(2, y);
+            content.add(none);
+            y += none.height + 3;
+        }
+
         setHeight(Math.min(requestedHeight, contentTop + y + 4));
         content.setHeight(Math.max(1, height - contentTop - 4));
         if (y > content.height) {
@@ -109,6 +137,16 @@ public final class QuestDependencyPanel extends Panel {
             scrollBar.setPosAndSize(width - 9, contentTop, 6, content.height);
             add(scrollBar);
         }
+    }
+
+    private Component filterLabel() {
+        long count = entries.stream()
+                .filter(entry -> filter.matches(entry.satisfied()))
+                .count();
+        String name = filter.name().toLowerCase(Locale.ROOT);
+        return Component.translatable(
+                "questaddons.gui.dependencies.filter",
+                Component.translatable("questaddons.gui.dependencies.filter." + name, count));
     }
 
     private Component requirementText() {
@@ -168,7 +206,11 @@ public final class QuestDependencyPanel extends Panel {
                     }
                     boolean satisfied = DependencyPanels.isSatisfied(quest, data, dependency);
                     return new Entry(
-                            dependency, visible, navigable, satisfied, visible ? tasks(dependency, data) : List.of());
+                            dependency,
+                            visible,
+                            navigable,
+                            satisfied,
+                            visible && !satisfied ? tasks(dependency, data) : List.of());
                 })
                 .toList();
     }
