@@ -7,9 +7,13 @@
     "BaseScreenQuestWindowsMixin",
     "BaseScreenSplitMixin",
     "ButtonListSearchMixin",
+    "ChapterButtonMixin",
+    "ChapterGroupButtonMixin",
     "ChapterImageButtonMixin",
+    "ChapterPanelAccessor",
     "ChapterPanelMixin",
     "CloseViewQuestButtonMixin",
+    "ExpandChaptersButtonMixin",
     "KeyMixin",
     "MultilineTextEditorOuterPanelMixin",
     "MultilineTextEditorScreenMixin",
@@ -31,6 +35,7 @@
     "TaskAccessor",
     "TaskButtonMixin",
     "TextBoxRetypeSelectionMixin",
+    "ViewQuestPanelAccessor",
     "ViewQuestPanelMixin"
   ],
   "injectors": {

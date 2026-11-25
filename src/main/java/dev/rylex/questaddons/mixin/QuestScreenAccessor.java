@@ -1,6 +1,7 @@
 package dev.rylex.questaddons.mixin;
 
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftbquests.client.gui.quests.ChapterPanel;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Movable;
@@ -34,4 +35,7 @@ public interface QuestScreenAccessor {
 
     @Invoker("selectAllQuestsInBox")
     void questaddons$selectAllQuestsInBox(int mouseX, int mouseY, double scrollX, double scrollY);
+
+    @Accessor("chapterPanel")
+    ChapterPanel questaddons$chapterPanel();
 }

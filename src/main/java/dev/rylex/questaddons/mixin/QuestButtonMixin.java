@@ -1,6 +1,7 @@
 package dev.rylex.questaddons.mixin;
 
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
@@ -11,8 +12,10 @@ import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.rylex.questaddons.client.ChangeShapeForAll;
 import dev.rylex.questaddons.client.ClickGestureGuard;
+import dev.rylex.questaddons.client.DependencyHighlight;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
 import java.util.List;
+import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -85,5 +88,13 @@ public abstract class QuestButtonMixin {
     private List<ContextMenuItem> questaddons$addChangeShapeForAll(List<ContextMenuItem> menu) {
         ChangeShapeForAll.insertInto(menu, quest, List.copyOf(questScreen.getSelectedQuests()));
         return menu;
+    }
+
+    @Inject(method = "draw", at = @At("TAIL"))
+    private void questaddons$outlineDependency(
+            GuiGraphics graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
+        if (DependencyHighlight.isQuest(questScreen, quest)) {
+            DependencyHighlight.outlineAround(graphics, x, y, w, h);
+        }
     }
 }

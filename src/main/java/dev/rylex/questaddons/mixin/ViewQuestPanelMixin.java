@@ -2,6 +2,8 @@ package dev.rylex.questaddons.mixin;
 
 import dev.ftb.mods.ftblibrary.config.ListConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.BlankPanel;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -15,10 +17,12 @@ import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.rylex.questaddons.client.ClickGestureGuard;
+import dev.rylex.questaddons.client.DependencyHighlight;
 import dev.rylex.questaddons.client.FloatingQuestPanel;
 import dev.rylex.questaddons.client.PreviewTargets;
 import dev.rylex.questaddons.client.QuestCollapse;
 import dev.rylex.questaddons.client.QuestWindows;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,6 +37,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ViewQuestPanelMixin {
     @Shadow
     private Quest quest;
+
+    @Shadow
+    private Button buttonOpenDependencies;
 
     @Shadow
     private BlankPanel panelContent;
@@ -166,4 +173,46 @@ public abstract class ViewQuestPanelMixin {
         self.setPos((self.getParent().width - self.width) / 2, (self.getParent().height - self.height) / 2);
     }
 
+    @Inject(method = "addWidgets", at = @At("TAIL"))
+    private void questaddons$highlightDependencies(CallbackInfo ci) {
+        Button original = buttonOpenDependencies;
+        if (quest == null || original == null || !quest.hasDependencies()) {
+            return;
+        }
+
+        ViewQuestPanel self = (ViewQuestPanel) (Object) this;
+        List<Widget> widgets = self.getWidgets();
+        int index = widgets.indexOf(original);
+        if (index < 0) {
+            return;
+        }
+
+        Quest viewed = quest;
+        Icon icon = Icon.getIcon("ftbquests:textures/gui/arrow_left.png")
+                .withTint((Color4I) ThemeProperties.QUEST_VIEW_TITLE.get(viewed));
+        SimpleButton replacement =
+                new SimpleButton(self, original.getTitle(), icon, (button, mouse) -> {
+                    if (mouse.isRight()) {
+                        ((ViewQuestPanelAccessor) self)
+                                .questaddons$showList(
+                                        viewed.streamDependencies().toList(), true);
+                    } else {
+                        DependencyHighlight.toggle(self);
+                    }
+                }) {
+                    @Override
+                    public void addMouseOverText(TooltipList list) {
+                        super.addMouseOverText(list);
+                        String hint = DependencyHighlight.isActive(self)
+                                ? "questaddons.gui.view_dependencies.unhighlight"
+                                : "questaddons.gui.view_dependencies.highlight";
+                        list.add(Component.translatable(hint).withStyle(ChatFormatting.GRAY));
+                        list.add(Component.translatable("questaddons.gui.view_dependencies.list")
+                                .withStyle(ChatFormatting.GRAY));
+                    }
+                };
+        replacement.setPosAndSize(original.posX, original.posY, original.width, original.height);
+        widgets.set(index, replacement);
+        buttonOpenDependencies = replacement;
+    }
 }
