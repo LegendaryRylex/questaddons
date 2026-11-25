@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.rylex.questaddons.client.BoxSelectState;
 import dev.rylex.questaddons.client.GridSnap;
+import dev.rylex.questaddons.client.QuestWindows;
 import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,5 +57,23 @@ public abstract class QuestScreenMixin {
     @ModifyVariable(method = "getSnappedXY", at = @At("STORE"), name = "snap")
     private double questaddons$gridSnap(double original) {
         return GridSnap.SNAP;
+    }
+
+    @Inject(method = "drawBackground", at = @At("HEAD"))
+    private void questaddons$updateQuestWindows(
+            GuiGraphics graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
+        QuestWindows.update((QuestScreen) (Object) this);
+    }
+
+    @Inject(method = "addWidgets", at = @At("TAIL"))
+    private void questaddons$addFloatingWindows(CallbackInfo ci) {
+        QuestWindows.addTo((QuestScreen) (Object) this);
+    }
+
+    @Inject(
+            method = {"refreshViewQuestPanel", "selectChapter"},
+            at = @At("TAIL"))
+    private void questaddons$refreshFloatingWindows(CallbackInfo ci) {
+        QuestWindows.refresh((QuestScreen) (Object) this);
     }
 }

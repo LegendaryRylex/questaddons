@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
+import dev.rylex.questaddons.client.QuestWindows;
 import dev.rylex.questaddons.client.SplitView;
 import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,6 +49,9 @@ public abstract class BaseScreenSplitMixin {
     private void questaddons$scopeModalDim(
             Color4I color, GuiGraphics graphics, int x, int y, int w, int h, Operation<Void> original) {
         BaseScreen self = (BaseScreen) (Object) this;
+        if (QuestWindows.hasFloating(self)) {
+            return;
+        }
         if (SplitView.isSplitHalf(self)) {
             original.call(color, graphics, self.getX(), self.getY(), self.width, self.height);
         } else {
