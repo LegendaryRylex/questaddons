@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public final class ComponentJsonRepair {
@@ -114,7 +115,7 @@ public final class ComponentJsonRepair {
             return new JsonPrimitive("");
         }
         if (json.isJsonPrimitive()) {
-            return json.getAsJsonPrimitive().isString() ? json : new JsonPrimitive(json.getAsString());
+            return isString(json) ? legacy(json.getAsString()) : new JsonPrimitive(json.getAsString());
         }
         if (json.isJsonArray()) {
             JsonArray array = json.getAsJsonArray();
@@ -122,10 +123,57 @@ public final class ComponentJsonRepair {
                 return new JsonPrimitive("");
             }
             JsonArray out = new JsonArray();
-            array.forEach(element -> out.add(component(element)));
-            return out;
+            array.forEach(element -> splice(out, element, true));
+            return out.isEmpty() ? new JsonPrimitive("") : out;
         }
         return object(json.getAsJsonObject());
+    }
+
+    private static JsonElement legacy(String text) {
+        Optional<List<JsonElement>> parts = LegacyFormatting.split(text);
+        if (parts.isEmpty()) {
+            return new JsonPrimitive(text);
+        }
+        if (parts.get().size() == 1) {
+            return parts.get().getFirst();
+        }
+        JsonArray out = new JsonArray();
+        splice(out, new JsonPrimitive(text), true);
+        return out.isEmpty() ? new JsonPrimitive("") : out;
+    }
+
+    private static void splice(JsonArray out, JsonElement element, boolean parentFirst) {
+        Optional<List<JsonElement>> parts =
+                isString(element) ? LegacyFormatting.split(element.getAsString()) : Optional.empty();
+        if (parts.isEmpty()) {
+            out.add(component(element));
+            return;
+        }
+        List<JsonElement> list = parts.get();
+        if (parentFirst && out.isEmpty() && !list.isEmpty() && !list.getFirst().isJsonPrimitive()) {
+            out.add("");
+        }
+        list.forEach(out::add);
+    }
+
+    private static void moveIntoExtra(JsonObject out, List<JsonElement> parts) {
+        JsonArray extra = new JsonArray();
+        int from = 0;
+        if (!parts.isEmpty() && parts.getFirst().isJsonPrimitive()) {
+            out.add("text", parts.getFirst());
+            from = 1;
+        } else {
+            out.addProperty("text", "");
+        }
+        parts.subList(from, parts.size()).forEach(extra::add);
+        if (out.has("extra")) {
+            out.getAsJsonArray("extra").forEach(extra::add);
+        }
+        out.add("extra", extra);
+    }
+
+    private static boolean isString(JsonElement element) {
+        return element.isJsonPrimitive() && element.getAsJsonPrimitive().isString();
     }
 
     private static JsonObject object(JsonObject in) {
@@ -143,6 +191,9 @@ public final class ComponentJsonRepair {
             out.addProperty("text", "");
         }
         renamed.entrySet().forEach(entry -> out.add(entry.getKey(), value(entry.getKey(), entry.getValue())));
+        if (out.has("text") && isString(out.get("text"))) {
+            LegacyFormatting.split(out.get("text").getAsString()).ifPresent(parts -> moveIntoExtra(out, parts));
+        }
         if (out.has("extra") && out.getAsJsonArray("extra").isEmpty()) {
             out.remove("extra");
         }
@@ -170,7 +221,13 @@ public final class ComponentJsonRepair {
     private static JsonArray list(JsonElement value, boolean components) {
         JsonArray in = value.isJsonArray() ? value.getAsJsonArray() : singleton(value);
         JsonArray out = new JsonArray();
-        in.forEach(element -> out.add(components || !element.isJsonPrimitive() ? component(element) : element));
+        in.forEach(element -> {
+            if (components) {
+                splice(out, element, false);
+            } else {
+                out.add(element.isJsonPrimitive() ? element : component(element));
+            }
+        });
         return out;
     }
 
