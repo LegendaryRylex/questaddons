@@ -29,6 +29,14 @@ class ImageInsertionTest {
     }
 
     @Test
+    void tagWritesValignOnlyWhenNotTop() {
+        assertEquals(SIDE, ImageInsertion.tag("minecraft:textures/item/diamond.png", 32, 32, "left", "top"));
+        assertEquals(
+                "{image:item:minecraft:beacon width:32 height:32 align:right valign:bottom}",
+                ImageInsertion.tag("item:minecraft:beacon", 32, 32, "right", "bottom"));
+    }
+
+    @Test
     void inlineGoesAtTheCursorOfAPlainLine() {
         ElementInsertion.Result result = insert("Mine |diamonds", TAG, false);
         assertEquals("Mine " + TAG + "diamonds", result.text());

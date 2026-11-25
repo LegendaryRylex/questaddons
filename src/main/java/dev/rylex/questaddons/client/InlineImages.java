@@ -1,6 +1,7 @@
 package dev.rylex.questaddons.client;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.util.client.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.quest.ImageClickAction;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +23,7 @@ public final class InlineImages {
     private static final int FLOAT_GAP = 4;
     private static final int GLYPH_HEIGHT = 8;
     private static final int MIN_TEXT_WIDTH = 40;
+    private static final int MAX_PASSES = 4;
 
     private InlineImages() {}
 
@@ -28,7 +31,11 @@ public final class InlineImages {
 
     public record Line(int y, int height, int textY, List<Run> runs) {}
 
-    public record Placed(Icon icon, Style style, int x, int y, int width, int height) {}
+    public record Placed(Icon icon, Style style, int x, int y, int width, int height) {
+        Placed atY(int top) {
+            return new Placed(icon, style, x, top, width, height);
+        }
+    }
 
     public record Layout(List<Line> lines, List<Placed> images, int height) {
         public Optional<Style> styleAt(int x, int y) {
@@ -103,18 +110,56 @@ public final class InlineImages {
             }
         }
 
-        List<Placed> images = new ArrayList<>();
         int floatLimit = left != null && right != null ? maxWidth / 3 : maxWidth / 2;
-        Placed leftFloat = left == null ? null : place(left, floatLimit, 0, 0, false, maxWidth);
-        Placed rightFloat = right == null ? null : place(right, floatLimit, 0, 0, true, maxWidth);
-        if (leftFloat != null) {
-            images.add(leftFloat);
-        }
-        if (rightFloat != null) {
-            images.add(rightFloat);
+        Placed leftBase = left == null ? null : place(left, floatLimit, false, maxWidth);
+        Placed rightBase = right == null ? null : place(right, floatLimit, true, maxWidth);
+        int tallest = Math.max(height(leftBase), height(rightBase));
+        ExtendedImage.VAlign tallestAlign = height(leftBase) >= height(rightBase) ? valign(left) : valign(right);
+
+        int textTop = 0;
+        int leftY = 0;
+        int rightY = 0;
+        Placed leftFloat = leftBase;
+        Placed rightFloat = rightBase;
+        Wrapper wrapper = wrap(flow, font, maxWidth, spacing, leftFloat, rightFloat, textTop);
+        for (int pass = 0; pass < MAX_PASSES && (leftBase != null || rightBase != null); pass++) {
+            int textHeight = wrapper.textBottom() - textTop;
+            int nextTop = tallest > textHeight ? tallestAlign.offset(tallest - textHeight) : 0;
+            int block = Math.max(nextTop + textHeight, tallest);
+            int nextLeft = leftBase == null ? 0 : valign(left).offset(block - leftBase.height());
+            int nextRight = rightBase == null ? 0 : valign(right).offset(block - rightBase.height());
+            if (nextTop == textTop && nextLeft == leftY && nextRight == rightY) {
+                break;
+            }
+            textTop = nextTop;
+            leftY = nextLeft;
+            rightY = nextRight;
+            leftFloat = leftBase == null ? null : leftBase.atY(leftY);
+            rightFloat = rightBase == null ? null : rightBase.atY(rightY);
+            wrapper = wrap(flow, font, maxWidth, spacing, leftFloat, rightFloat, textTop);
         }
 
-        Wrapper wrapper = new Wrapper(font, maxWidth, spacing, leftFloat, rightFloat, images);
+        List<Placed> images = new ArrayList<>();
+        int height = wrapper.textBottom();
+        for (Placed side : new Placed[] {leftFloat, rightFloat}) {
+            if (side != null) {
+                images.add(side);
+                height = Math.max(height, side.y() + side.height());
+            }
+        }
+        images.addAll(wrapper.images);
+        return new Layout(List.copyOf(wrapper.lines), List.copyOf(images), Math.max(height, 0));
+    }
+
+    private static Wrapper wrap(
+            List<Piece> flow,
+            Font font,
+            int maxWidth,
+            int spacing,
+            @Nullable Placed leftFloat,
+            @Nullable Placed rightFloat,
+            int top) {
+        Wrapper wrapper = new Wrapper(font, maxWidth, spacing, leftFloat, rightFloat, top);
         for (Piece piece : flow) {
             if (piece instanceof TextPiece text) {
                 wrapper.text(text.text(), text.style());
@@ -123,21 +168,23 @@ public final class InlineImages {
             }
         }
         wrapper.finish();
-
-        int height = wrapper.lines.isEmpty() ? 0 : wrapper.y - (spacing - GLYPH_HEIGHT);
-        if (leftFloat != null) {
-            height = Math.max(height, leftFloat.height());
-        }
-        if (rightFloat != null) {
-            height = Math.max(height, rightFloat.height());
-        }
-        return new Layout(List.copyOf(wrapper.lines), List.copyOf(images), Math.max(height, 0));
+        return wrapper;
     }
 
-    private static Placed place(ImagePiece piece, int limit, int x, int y, boolean right, int maxWidth) {
+    private static int height(@Nullable Placed image) {
+        return image == null ? 0 : image.height();
+    }
+
+    private static ExtendedImage.VAlign valign(@Nullable ImagePiece piece) {
+        return piece != null && piece.image() instanceof ExtendedImage extended
+                ? extended.valign()
+                : ExtendedImage.VAlign.TOP;
+    }
+
+    private static Placed place(ImagePiece piece, int limit, boolean right, int maxWidth) {
         int[] size = size(piece.image(), limit);
         return new Placed(
-                piece.image().getImage(), imageStyle(piece), right ? maxWidth - size[0] : x, y, size[0], size[1]);
+                piece.image().getImage(), imageStyle(piece), right ? maxWidth - size[0] : 0, 0, size[0], size[1]);
     }
 
     private static int[] size(ImageComponent image, int limit) {
@@ -152,7 +199,15 @@ public final class InlineImages {
 
     private static Style imageStyle(ImagePiece piece) {
         String action = piece.image().getClickAction();
-        return action.isEmpty() ? piece.style() : piece.style().withInsertion(CLICK_PREFIX + action);
+        if (!action.isEmpty()) {
+            return piece.style().withInsertion(CLICK_PREFIX + action);
+        }
+        if (piece.style().getHoverEvent() == null && piece.image().getImage() instanceof ItemIcon item) {
+            return piece.style()
+                    .withHoverEvent(
+                            new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(item.getStack())));
+        }
+        return piece.style();
     }
 
     private static List<Piece> flatten(Component component) {
@@ -217,7 +272,7 @@ public final class InlineImages {
         private final int spacing;
         private final @Nullable Placed leftFloat;
         private final @Nullable Placed rightFloat;
-        private final List<Placed> images;
+        private final List<Placed> images = new ArrayList<>();
         private final List<Line> lines = new ArrayList<>();
 
         private final List<Run> runs = new ArrayList<>();
@@ -235,6 +290,7 @@ public final class InlineImages {
         private int left;
         private int right;
         private int tallest;
+        private final int top;
 
         private Wrapper(
                 Font font,
@@ -242,14 +298,23 @@ public final class InlineImages {
                 int spacing,
                 @Nullable Placed leftFloat,
                 @Nullable Placed rightFloat,
-                List<Placed> images) {
+                int top) {
             this.font = font;
             this.maxWidth = maxWidth;
             this.spacing = spacing;
             this.leftFloat = leftFloat;
             this.rightFloat = rightFloat;
-            this.images = images;
+            this.y = top;
+            this.top = top;
             openLine();
+        }
+
+        private int textBottom() {
+            return lines.isEmpty() ? top : y - (spacing - GLYPH_HEIGHT);
+        }
+
+        private boolean beside(@Nullable Placed image) {
+            return image != null && y < image.y() + image.height() && y + spacing > image.y();
         }
 
         private void text(String text, Style style) {
@@ -364,10 +429,8 @@ public final class InlineImages {
         }
 
         private void openLine() {
-            left = leftFloat != null && y < leftFloat.height() ? leftFloat.width() + FLOAT_GAP : 0;
-            right = rightFloat != null && y < rightFloat.height()
-                    ? maxWidth - rightFloat.width() - FLOAT_GAP
-                    : maxWidth;
+            left = beside(leftFloat) ? leftFloat.width() + FLOAT_GAP : 0;
+            right = beside(rightFloat) ? maxWidth - rightFloat.width() - FLOAT_GAP : maxWidth;
             if (right - left < MIN_TEXT_WIDTH) {
                 y = Math.max(y, Math.max(bottom(leftFloat), bottom(rightFloat)));
                 left = 0;
@@ -380,7 +443,7 @@ public final class InlineImages {
         }
 
         private static int bottom(@Nullable Placed image) {
-            return image == null ? 0 : image.height() + 1;
+            return image == null ? 0 : image.y() + image.height() + 1;
         }
 
         private void closeLine() {

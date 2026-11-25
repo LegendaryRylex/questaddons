@@ -8,8 +8,18 @@ public final class ImageInsertion {
     private ImageInsertion() {}
 
     public static String tag(String image, int width, int height, @Nullable String align) {
-        String tag = "{image:" + image + " width:" + width + " height:" + height;
-        return (align == null ? tag : tag + " align:" + align) + "}";
+        return tag(image, width, height, align, null);
+    }
+
+    public static String tag(String image, int width, int height, @Nullable String align, @Nullable String valign) {
+        StringBuilder tag = new StringBuilder("{image:" + image + " width:" + width + " height:" + height);
+        if (align != null) {
+            tag.append(" align:").append(align);
+        }
+        if (valign != null && !valign.equals("top")) {
+            tag.append(" valign:").append(valign);
+        }
+        return tag.append('}').toString();
     }
 
     public static ElementInsertion.Result insert(
