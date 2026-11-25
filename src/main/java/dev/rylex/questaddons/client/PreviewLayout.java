@@ -13,6 +13,10 @@ public final class PreviewLayout {
         return shown;
     }
 
+    public static void resetToSetting() {
+        shown = QuestAddonsConfig.LIVE_PREVIEW_OPEN.get();
+    }
+
     public static void toggle() {
         shown = !shown;
     }

@@ -86,6 +86,7 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
             return;
         }
         questaddons$preview = new DescriptionPreview(outerPanel, target.quest(), target.viewWidth(), textBox);
+        PreviewLayout.resetToSetting();
         hotKeys.put(GLFW.GLFW_KEY_V, this::questaddons$togglePreview);
     }
 

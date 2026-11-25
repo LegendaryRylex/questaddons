@@ -1,5 +1,6 @@
 package dev.rylex.questaddons;
 
+import dev.rylex.questaddons.client.QuestAddonsConfig;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -13,6 +14,7 @@ public final class QuestAddons {
     public QuestAddons(IEventBus modBus, ModContainer container, Dist dist) {
         if (dist.isClient()) {
             QuestAddonsKeys.init(modBus);
+            QuestAddonsConfig.init();
         }
     }
 }
