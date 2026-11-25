@@ -57,6 +57,15 @@ public final class TrackerActions {
         return Optional.empty();
     }
 
+    public static long amountNeeded(Task task) {
+        if (!(task instanceof ItemTask)) {
+            return 1L;
+        }
+        TeamData data = teamData();
+        long progress = data == null ? 0L : data.getProgress(task);
+        return Math.max(1L, task.getMaxProgress() - progress);
+    }
+
     private static void showRecipes(ItemStack stack, boolean uses) {
         if (JeiCompat.isLoaded()) {
             JeiCompat.showRecipes(stack, uses);

@@ -45,6 +45,10 @@ public final class QuestAddonsJeiPlugin implements IModPlugin {
                 && runtime.getScreenHelper().getGuiProperties(screen).isPresent();
     }
 
+    static boolean hasKeyboardFocus() {
+        return runtime != null && runtime.getIngredientListOverlay().hasKeyboardFocus();
+    }
+
     static void showRecipes(ItemStack stack, boolean uses) {
         if (runtime == null) {
             return;

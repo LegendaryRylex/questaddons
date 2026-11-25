@@ -17,6 +17,10 @@ public final class JeiCompat {
         return QuestAddonsJeiPlugin.isJeiScreen(screen);
     }
 
+    public static boolean hasKeyboardFocus() {
+        return QuestAddonsJeiPlugin.hasKeyboardFocus();
+    }
+
     public static void showRecipes(ItemStack stack, boolean uses) {
         QuestAddonsJeiPlugin.showRecipes(stack, uses);
     }

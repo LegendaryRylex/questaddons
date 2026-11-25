@@ -100,6 +100,7 @@ dependencies {
     compileOnly "org.appliedenergistics:guideme:${guideme_version}"
     compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    compileOnly "curse.maven:nei-features-for-jei-1759425:${neiaddon_file_id}"
 
     localRuntime "dev.architectury:architectury-neoforge:${architectury_version}"
     localRuntime "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
