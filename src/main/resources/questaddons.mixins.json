@@ -23,7 +23,6 @@
     "QuestScreenAccessor",
     "QuestScreenFilterMixin",
     "QuestScreenMixin",
-    "QuestScreenSaveMixin",
     "QuestScreenSelectionMixin",
     "QuestScreenSplitMixin",
     "ScreenWrapperSplitMixin",

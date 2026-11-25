@@ -4,7 +4,6 @@
   "key.questaddons.move_selection": "Move Selection (hold + click a selected quest)",
   "key.questaddons.toggle_optional": "Toggle Optional (hover a quest task, or hold + right-click a quest)",
   "key.questaddons.quest_filter": "Smart Filter From Quest Items (in your inventory, from the hotbar, or the whole inventory with Shift)",
-  "key.questaddons.save_quests": "Save Quests on Server (hold Shift to download the quest files instead)",
   "key.questaddons.split_view": "Split View (two chapters side by side)",
   "key.questaddons.split_view_stacked": "Split View Stacked (two chapters one above the other)",
   "questaddons.gui.change_shape_all": "Change Shape for all: %s",

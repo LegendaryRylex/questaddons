@@ -40,14 +40,6 @@ public final class QuestAddonsKeys {
             GLFW.GLFW_KEY_KP_ADD,
             CATEGORY);
 
-    public static final KeyMapping SAVE_QUESTS = new KeyMapping(
-            "key.questaddons.save_quests",
-            KeyConflictContext.GUI,
-            KeyModifier.CONTROL,
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_S,
-            CATEGORY);
-
     public static final KeyMapping SPLIT_VIEW = new KeyMapping(
             "key.questaddons.split_view",
             KeyConflictContext.GUI,
@@ -71,7 +63,6 @@ public final class QuestAddonsKeys {
             event.register(MOVE_SELECTION);
             event.register(TOGGLE_OPTIONAL);
             event.register(QUEST_FILTER);
-            event.register(SAVE_QUESTS);
             event.register(SPLIT_VIEW);
             event.register(SPLIT_VIEW_STACKED);
         });
