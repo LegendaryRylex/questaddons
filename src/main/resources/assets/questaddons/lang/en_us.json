@@ -43,5 +43,16 @@
   "questaddons.smart_filter.no_inventory_items": "No items in the inventory",
   "questaddons.smart_filter.creative_only": "Creative mode is needed to make a Smart Filter",
   "questaddons.smart_filter.inventory_full": "No free inventory slot for the Smart Filter",
-  "questaddons.smart_filter.mod_missing": "FTB Filter System is not installed"
+  "questaddons.smart_filter.mod_missing": "FTB Filter System is not installed",
+  "questaddons.gui.view_dependencies.highlight": "Left-click to pop the window out and highlight dependencies in the book",
+  "questaddons.gui.view_dependencies.unhighlight": "Left-click to stop highlighting",
+  "questaddons.gui.view_dependencies.list": "Right-click to list them",
+  "questaddons.gui.pinned_tracker.drag": "Drag to move",
+  "questaddons.gui.pinned_tracker.reset": "Right-click to put it back where the FTB Quests settings place it",
+  "questaddons.gui.pinned_tracker.open": "Click to open in the quest book",
+  "questaddons.gui.collapse": "Collapse",
+  "questaddons.gui.collapse.tooltip": "Hides the subtitle and description, keeping the tasks and rewards",
+  "questaddons.gui.expand": "Expand",
+  "questaddons.gui.expand.tooltip": "Shows the subtitle and description again",
+  "questaddons.gui.pinned_tracker.locked": "Locked until its dependencies are done"
 }

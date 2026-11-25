@@ -20,6 +20,7 @@
     "MultilineTextEditorToolbarMixin",
     "NetClientSplitMixin",
     "PanelAccessor",
+    "PinnedQuestsTrackerMixin",
     "QuestAccessor",
     "QuestButtonMixin",
     "QuestDescriptionConfigMixin",
