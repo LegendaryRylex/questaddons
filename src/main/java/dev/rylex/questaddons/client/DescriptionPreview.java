@@ -187,6 +187,10 @@ public final class DescriptionPreview extends Widget {
         clampScroll();
     }
 
+    public int fixedWidth() {
+        return questTextWidth(getGui().getTheme()) + MARGIN * 2 + SCROLL_ROOM;
+    }
+
     private int questTextWidth(Theme theme) {
         if (viewWidth > 0) {
             return viewWidth - 6;
