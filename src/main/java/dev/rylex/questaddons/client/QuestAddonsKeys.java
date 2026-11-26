@@ -30,10 +30,6 @@ public final class QuestAddonsKeys {
 
     public static final KeyMapping QUEST_FILTER = unbound("quest_filter");
 
-    public static final KeyMapping SPLIT_VIEW = unbound("split_view");
-
-    public static final KeyMapping SPLIT_VIEW_STACKED = unbound("split_view_stacked");
-
     public static final KeyMapping FIX_JSON = unbound("fix_json");
 
     public static final KeyMapping TOGGLE_PREVIEW = unbound("toggle_preview");
@@ -59,8 +55,6 @@ public final class QuestAddonsKeys {
             event.register(MOVE_SELECTION);
             event.register(TOGGLE_OPTIONAL);
             event.register(QUEST_FILTER);
-            event.register(SPLIT_VIEW);
-            event.register(SPLIT_VIEW_STACKED);
             event.register(FIX_JSON);
             event.register(TOGGLE_PREVIEW);
             Arrays.stream(DescriptionInsert.values())

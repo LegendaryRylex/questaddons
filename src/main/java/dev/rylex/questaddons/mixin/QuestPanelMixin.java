@@ -1,6 +1,5 @@
 package dev.rylex.questaddons.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
@@ -10,15 +9,11 @@ import dev.rylex.questaddons.client.BoxSelectState;
 import dev.rylex.questaddons.client.GridSnap;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
 import dev.rylex.questaddons.client.QuestWindows;
-import dev.rylex.questaddons.client.SplitView;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -55,43 +50,6 @@ public abstract class QuestPanelMixin {
         ((QuestScreenAccessor) questScreen)
                 .questaddons$selectAllQuestsInBox(
                         self.getMouseX(), self.getMouseY(), self.getScrollX(), self.getScrollY());
-    }
-
-    @ModifyArg(
-            method = "renderConnection",
-            at =
-                    @At(
-                            value = "INVOKE",
-                            target =
-                                    "Lnet/minecraft/client/renderer/state/gui/BlitRenderState;<init>(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/gui/render/TextureSetup;Lorg/joml/Matrix3x2f;IIIIFFFFILnet/minecraft/client/gui/navigation/ScreenRectangle;)V"),
-            index = 12)
-    private ScreenRectangle questaddons$clipConnectionToSplitHalf(ScreenRectangle original) {
-        if (original != null || !SplitView.isSplitHalf(questScreen)) {
-            return original;
-        }
-        return new ScreenRectangle(questScreen.getX(), questScreen.getY(), questScreen.width, questScreen.height);
-    }
-
-    @ModifyExpressionValue(
-            method = "draw",
-            at =
-                    @At(
-                            value = "FIELD",
-                            target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;width:I",
-                            opcode = Opcodes.GETFIELD))
-    private int questaddons$centreOnOwningScreenX(int original) {
-        return original + 2 * questScreen.getX();
-    }
-
-    @ModifyExpressionValue(
-            method = "draw",
-            at =
-                    @At(
-                            value = "FIELD",
-                            target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;height:I",
-                            opcode = Opcodes.GETFIELD))
-    private int questaddons$centreOnOwningScreenY(int original) {
-        return original + 2 * questScreen.getY();
     }
 
     @ModifyVariable(method = "draw", at = @At("STORE"), name = "snap")

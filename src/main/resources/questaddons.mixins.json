@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "BaseScreenQuestWindowsMixin",
-    "BaseScreenSplitMixin",
     "ChapterButtonMixin",
     "ChapterGroupButtonMixin",
     "ChapterImageButtonMixin",
@@ -16,7 +15,6 @@
     "MultilineTextEditorOuterPanelMixin",
     "MultilineTextEditorScreenMixin",
     "MultilineTextEditorToolbarMixin",
-    "NetClientSplitMixin",
     "PanelAccessor",
     "PinnedQuestsTrackerMixin",
     "QuestAccessor",
@@ -29,8 +27,6 @@
     "QuestScreenFilterMixin",
     "QuestScreenMixin",
     "QuestScreenSelectionMixin",
-    "QuestScreenSplitMixin",
-    "ScreenWrapperSplitMixin",
     "TaskAccessor",
     "TaskButtonMixin",
     "ViewQuestPanelMixin"
