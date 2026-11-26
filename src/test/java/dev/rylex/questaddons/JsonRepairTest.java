@@ -130,6 +130,40 @@ class JsonRepairTest {
                         + "\"clickEvent\":{\"action\":\"open_url\",\"value\":\"x\"}}"));
     }
 
+    @ParameterizedTest
+    @CsvSource(
+            delimiter = '|',
+            quoteCharacter = '`',
+            value = {
+                "[\"Mine it with &dSilk Touch&r from your \",{\"text\":\"Drill\",\"color\":\"green\"},\".\"]"
+                        + "|[\"Mine it with \",{\"text\":\"Silk Touch\",\"color\":\"light_purple\"},"
+                        + "\" from your \",{\"text\":\"Drill\",\"color\":\"green\"},\".\"]",
+                "[\"&aGreen&r plain\",\"b\"]|[\"\",{\"text\":\"Green\",\"color\":\"green\"},\" plain\",\"b\"]",
+                "[\"\u00a7lBold\"]|[\"\",{\"text\":\"Bold\",\"bold\":true}]",
+                "[\"&#ff8800Orange &lloud\"]|[\"\",{\"text\":\"Orange \",\"color\":\"#FF8800\"},"
+                        + "{\"text\":\"loud\",\"color\":\"#FF8800\",\"bold\":true}]",
+                "{\"text\":\"Hi &cthere\",\"italic\":true}"
+                        + "|{\"text\":\"Hi \",\"italic\":true,\"extra\":[{\"text\":\"there\",\"color\":\"red\"}]}",
+                "{\"text\":\"a\",\"extra\":[\"&cred\"]}|{\"text\":\"a\",\"extra\":[{\"text\":\"red\",\"color\":\"red\"}]}",
+                "[\"R&D & more\"]|[\"R&D & more\"]"
+            })
+    void convertsFormattingCodes(String line, String expected) {
+        assertEquals(expected, repair(line));
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+            delimiter = '|',
+            quoteCharacter = '`',
+            value = {
+                "[{\"text\":\"{image:a.png}\"},{\"text\":\"{\\\"text\\\": \\\"{image:a.png}\",\"underlined\":true},\"b\"]|[{\"text\":\"{image:a.png}\",\"underlined\":true},\"b\"]",
+                "[\"a\",{\"text\":\"{\\\"text\\\": \\\"b\\\"}\",\"bold\":true}]|[\"a\",{\"text\":\"b\",\"bold\":true}]",
+                "{\"text\":\"{\\\"text\\\": \\\"say \\\\\\\"hi\\\\\\\"\",\"bold\":true}|{\"text\":\"say \\\"hi\\\"\",\"bold\":true}"
+            })
+    void unwrapsTextThatSwallowedItsOwnElement(String line, String expected) {
+        assertEquals(expected, repair(line));
+    }
+
     @Test
     void rejectsUnrecoverableSyntax() {
         assertTrue(LenientJson.parse("{\"text\":}").isEmpty());

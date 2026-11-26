@@ -3,12 +3,17 @@ package dev.rylex.questaddons.client;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class ComponentJsonRepair {
     private static final String CLICK_EVENT = "click_event";
@@ -39,6 +44,8 @@ public final class ComponentJsonRepair {
     private static final String OPEN_DOCS = "ftbquests:docs";
     private static final String DOCS_PREFIX = "docs:";
     private static final Map<String, String> KEYS = new HashMap<>();
+    private static final Pattern STRAY_WRAPPER =
+            Pattern.compile("\\{\\s*\"text\"\\s*:\\s*\"(.*?)(?:\"\\s*\\})?", Pattern.DOTALL);
 
     static {
         for (String key : List.of(
@@ -123,18 +130,111 @@ public final class ComponentJsonRepair {
             return new JsonPrimitive("");
         }
         if (json.isJsonPrimitive()) {
-            return json.getAsJsonPrimitive().isString() ? json : new JsonPrimitive(json.getAsString());
+            return isString(json) ? legacy(json.getAsString()) : new JsonPrimitive(json.getAsString());
         }
         if (json.isJsonArray()) {
             JsonArray array = json.getAsJsonArray();
             if (array.isEmpty()) {
                 return new JsonPrimitive("");
             }
+            List<JsonElement> elements = new ArrayList<>();
+            array.forEach(element -> {
+                Optional<JsonObject> unwrapped = strayWrapper(element);
+                if (unwrapped.isPresent() && !elements.isEmpty() && plainCopyOf(elements.getLast(), unwrapped.get())) {
+                    elements.removeLast();
+                }
+                elements.add(unwrapped.map(JsonElement.class::cast).orElse(element));
+            });
             JsonArray out = new JsonArray();
-            array.forEach(element -> out.add(component(element)));
-            return out;
+            elements.forEach(element -> splice(out, element, true));
+            return out.isEmpty() ? new JsonPrimitive("") : out;
         }
-        return object(json.getAsJsonObject());
+        return object(strayWrapper(json).orElse(json.getAsJsonObject()));
+    }
+
+    private static Optional<JsonObject> strayWrapper(JsonElement element) {
+        if (!element.isJsonObject()
+                || !element.getAsJsonObject().has("text")
+                || !isString(element.getAsJsonObject().get("text"))) {
+            return Optional.empty();
+        }
+        Matcher matcher =
+                STRAY_WRAPPER.matcher(element.getAsJsonObject().get("text").getAsString());
+        if (!matcher.matches()) {
+            return Optional.empty();
+        }
+        JsonObject unwrapped = element.getAsJsonObject().deepCopy();
+        unwrapped.addProperty("text", unescaped(matcher.group(1)));
+        return Optional.of(unwrapped);
+    }
+
+    private static String unescaped(String raw) {
+        try {
+            return JsonParser.parseString("\"" + raw + "\"").getAsString();
+        } catch (RuntimeException e) {
+            return raw;
+        }
+    }
+
+    private static boolean plainCopyOf(JsonElement previous, JsonObject styled) {
+        JsonObject plain;
+        if (isString(previous)) {
+            plain = new JsonObject();
+            plain.add("text", previous);
+        } else if (previous.isJsonObject()) {
+            plain = previous.getAsJsonObject();
+        } else {
+            return false;
+        }
+        return plain.has("text")
+                && plain.entrySet().stream().allMatch(entry -> entry.getValue().equals(styled.get(entry.getKey())));
+    }
+
+    private static JsonElement legacy(String text) {
+        Optional<List<JsonElement>> parts = LegacyFormatting.split(text);
+        if (parts.isEmpty()) {
+            return new JsonPrimitive(text);
+        }
+        if (parts.get().size() == 1) {
+            return parts.get().getFirst();
+        }
+        JsonArray out = new JsonArray();
+        splice(out, new JsonPrimitive(text), true);
+        return out.isEmpty() ? new JsonPrimitive("") : out;
+    }
+
+    private static void splice(JsonArray out, JsonElement element, boolean parentFirst) {
+        Optional<List<JsonElement>> parts =
+                isString(element) ? LegacyFormatting.split(element.getAsString()) : Optional.empty();
+        if (parts.isEmpty()) {
+            out.add(component(element));
+            return;
+        }
+        List<JsonElement> list = parts.get();
+        if (parentFirst && out.isEmpty() && !list.isEmpty() && !list.getFirst().isJsonPrimitive()) {
+            out.add("");
+        }
+        list.forEach(out::add);
+    }
+
+    private static void moveIntoExtra(JsonObject out, List<JsonElement> parts) {
+        JsonArray extra = new JsonArray();
+        int from = 0;
+        if (!parts.isEmpty() && parts.getFirst().isJsonPrimitive()) {
+            out.add("text", parts.getFirst());
+            from = 1;
+        } else {
+            out.addProperty("text", "");
+        }
+        parts.subList(from, parts.size()).forEach(extra::add);
+        if (out.has("extra")) {
+            out.getAsJsonArray("extra").forEach(extra::add);
+        }
+        out.add("extra", extra);
+    }
+
+    private static boolean isString(JsonElement element) {
+        return element.isJsonPrimitive() && element.getAsJsonPrimitive().isString();
     }
 
     private static JsonObject object(JsonObject in) {
@@ -152,6 +252,9 @@ public final class ComponentJsonRepair {
             out.addProperty("text", "");
         }
         renamed.entrySet().forEach(entry -> out.add(entry.getKey(), value(entry.getKey(), entry.getValue())));
+        if (out.has("text") && isString(out.get("text"))) {
+            LegacyFormatting.split(out.get("text").getAsString()).ifPresent(parts -> moveIntoExtra(out, parts));
+        }
         if (out.has("extra") && out.getAsJsonArray("extra").isEmpty()) {
             out.remove("extra");
         }
@@ -179,7 +282,13 @@ public final class ComponentJsonRepair {
     private static JsonArray list(JsonElement value, boolean components) {
         JsonArray in = value.isJsonArray() ? value.getAsJsonArray() : singleton(value);
         JsonArray out = new JsonArray();
-        in.forEach(element -> out.add(components || !element.isJsonPrimitive() ? component(element) : element));
+        in.forEach(element -> {
+            if (components) {
+                splice(out, element, false);
+            } else {
+                out.add(element.isJsonPrimitive() ? element : component(element));
+            }
+        });
         return out;
     }
 
