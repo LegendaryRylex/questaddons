@@ -26,6 +26,7 @@
     "QuestScreenArrowMoveMixin",
     "QuestScreenFilterMixin",
     "QuestScreenMixin",
+    "QuestScreenSearchMixin",
     "QuestScreenSelectionMixin",
     "TaskAccessor",
     "TaskButtonMixin",
