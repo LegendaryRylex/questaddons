@@ -16,7 +16,7 @@ All unbound by default. Set them in Controls under "Quest Addons". Editing keybi
 | Smart Filter | Gives an FTB Filter System smart filter matching an open quest's item tasks, or your hotbar from the inventory (the whole inventory with Shift). Creative only, needs FTB Filter System. |
 | JSON Fixer | Runs the description editor's JSON Fixer. |
 | Live Preview | Shows or hides the description editor's Live Preview. |
-| Insert Keybind, Hover Text, Item, Command Link, Copy Link, Font, Inline Image, Side Image, Recipe Link, GuideMe Link, Patchouli Link | Opens that insert button in the description editor. Recipe Link needs JEI, GuideMe Link and Patchouli Link need their mod. |
+| Insert Keybind, Hover Text, Item or Fluid, Command Link, Copy Link, Font, Inline Image, Side Image, Recipe Link, GuideMe Link, Patchouli Link | Opens that insert button in the description editor. Recipe Link needs JEI, GuideMe Link and Patchouli Link need their mod. |
 
 ## Quest book
 
@@ -30,7 +30,7 @@ All unbound by default. Set them in Controls under "Quest Addons". Editing keybi
 - **JSON Fixer**, next to Convert to JSON, repairs every broken JSON text line: missing or extra brackets, trailing or missing commas, single or curly quotes, unquoted keys, stray quotes in text, miscased colour names, string booleans, click and hover events in the older camelCase format, text holding a pasted copy of its own element, click and hover events that do nothing, and a link, tooltip, shift-click text or style split across two copies of the same text. A link or tooltip on empty text moves to the text after it. Formatting codes inside JSON text, such as `&d` or `&#FF8800`, become JSON styles. Lines it can't repair are listed and the cursor jumps to the first.
 - **Insert buttons** add a text element as JSON at the cursor, wrapping or replacing the selection, also inside a JSON element's text, where only the selected part takes the new style.
   - Keybind: each player sees their own key in yellow.
-  - Item: the item's name with its tooltip. The tooltip shows its icon, and clicking opens its recipes in JEI, REI or EMI (needs FTB XMod Compat).
+  - Item or Fluid: pick either from one list, with Items and Fluids, Items, Fluids and Inventory search modes. Adds its name with its tooltip. The tooltip shows its icon, and clicking opens its recipes in JEI, REI or EMI (needs FTB XMod Compat).
   - Command Link and Copy Link: a link that runs a command or copies text.
   - Font: any loaded font.
   - Recipe Link (JEI): pick an item or fluid, then one recipe that makes it, shown with its machine's icon and recipe ID. A bucket also lists the recipes that make its fluid. Adds the name as a link to that recipe, with the recipe type on hover.

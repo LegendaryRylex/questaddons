@@ -154,6 +154,18 @@ public final class InsertContext {
         });
     }
 
+    public void pickItemOrFluid(Consumer<RecipeTarget> picked) {
+        ItemOrFluidPicker.Config config = ItemOrFluidPicker.config();
+        config.onClicked(screen, MouseButton.LEFT, ok -> {
+            screen.openGui();
+            if (ok && !config.isEmpty()) {
+                picked.accept(ItemOrFluidPicker.target(config.getValue()));
+            } else {
+                cancel.run();
+            }
+        });
+    }
+
     private void placeUnderAnchor(Widget panel) {
         panel.setPos(
                 fit(anchorX, panel.width, screen.getWindow().getGuiScaledWidth()) - screen.getX(),
