@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.rylex.questaddons.client.InlineImages;
 import dev.rylex.questaddons.client.ItemLinkTooltip;
 import dev.rylex.questaddons.client.ItemRecipeClick;
+import dev.rylex.questaddons.client.RecipeLinkClick;
 import java.util.Optional;
 import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,6 +17,13 @@ public abstract class QuestDescriptionFieldMixin {
     @Inject(method = "handleCustomClickEvent", at = @At("HEAD"), cancellable = true)
     private void questaddons$showItemRecipes(Style style, CallbackInfoReturnable<Boolean> cir) {
         if (ItemRecipeClick.show(style)) {
+            cir.setReturnValue(true);
+        }
+    }
+
+    @Inject(method = "handleCustomClickEvent", at = @At("HEAD"), cancellable = true)
+    private void questaddons$openRecipeLink(Style style, CallbackInfoReturnable<Boolean> cir) {
+        if (RecipeLinkClick.open(style)) {
             cir.setReturnValue(true);
         }
     }

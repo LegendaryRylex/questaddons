@@ -40,6 +40,10 @@ public final class QuestAddonsJeiPlugin implements IModPlugin {
         runtime = null;
     }
 
+    static @Nullable IJeiRuntime runtime() {
+        return runtime;
+    }
+
     static boolean isJeiScreen(Screen screen) {
         return runtime != null
                 && runtime.getScreenHelper().getGuiProperties(screen).isPresent();
