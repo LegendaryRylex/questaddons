@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.rylex.questaddons.client.ComponentJsonRepair;
 import dev.rylex.questaddons.client.LenientJson;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -168,6 +169,74 @@ class JsonRepairTest {
             })
     void unwrapsTextThatSwallowedItsOwnElement(String line, String expected) {
         assertEquals(expected, repair(line));
+    }
+
+    @Test
+    void mergesALinkAndAnItemTooltipSplitAcrossTwoCopiesOfTheSameText() {
+        assertEquals(
+                "[{\"translate\":\"item.oritech.raw_biopolymer\",\"underlined\":true,\"click_event\":{\"action\":\"open_url\",\"url\":\"jei:modern_industrialization:electric_mixer?recipe=ftb:oritech/mi_mixer/raw_biopolymer_packed_wheat\"},\"hover_event\":{\"action\":\"show_item\",\"id\":\"oritech:raw_biopolymer\",\"count\":1}}]",
+                repair(
+                        "[{\"translate\": \"item.oritech.raw_biopolymer\", \"hoverEvent\": {\"contents\": \"\", \"action\": \"show_text\"}, \"clickEvent\": {\"action\": \"open_url\", \"value\": \"jei:modern_industrialization:electric_mixer?recipe=ftb:oritech/mi_mixer/raw_biopolymer_packed_wheat\"}, \"underlined\": true}, {\"translate\": \"item.oritech.raw_biopolymer\", \"hoverEvent\": {\"contents\": {\"id\": \"oritech:raw_biopolymer\", \"count\": 1}, \"action\": \"show_item\"}}]"));
+    }
+
+    @Test
+    void dropsEmptyHoverText() {
+        assertEquals(
+                "{\"text\":\"a\"}",
+                repair("{\"text\":\"a\",\"hover_event\":{\"action\":\"show_text\",\"value\":\"\"}}"));
+        assertEquals(
+                "{\"text\":\"a\"}",
+                repair(
+                        "{\"text\":\"a\",\"hover_event\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"bold\":true}}}"));
+    }
+
+    @Test
+    void keepsSplitEventsOnDifferentText() {
+        assertEquals(
+                "[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"x\"}},{\"text\":\"b\",\"hover_event\":{\"action\":\"show_text\",\"value\":\"t\"}}]",
+                repair(
+                        "[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"x\"}},{\"text\":\"b\",\"hover_event\":{\"action\":\"show_text\",\"value\":\"t\"}}]"));
+        assertEquals(
+                "[{\"text\":\"a\",\"bold\":true},{\"text\":\"a\"}]",
+                repair("[{\"text\":\"a\",\"bold\":true},{\"text\":\"a\"}]"));
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+            delimiter = '|',
+            quoteCharacter = '`',
+            value = {
+                "[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"},\"hover_event\":{\"action\":\"show_text\",\"value\":\"t\"}},{\"text\":\"a\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]|[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"},\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]",
+                "[{\"text\":\"a\",\"hover_event\":{\"action\":\"show_text\",\"value\":\"t\"}},{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"},\"hover_event\":{\"action\":\"show_text\",\"value\":\"u\"}}]|[{\"text\":\"a\",\"hover_event\":{\"action\":\"show_text\",\"value\":\"t\"}},{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"},\"hover_event\":{\"action\":\"show_text\",\"value\":\"u\"}}]",
+                "[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}},{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}}]|[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}}]",
+                "[{\"text\":\"a\",\"color\":\"gold\"},{\"text\":\"a\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]|[{\"text\":\"a\",\"color\":\"gold\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]",
+                "[{\"text\":\"a\",\"insertion\":\"x\"},{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}}]|[{\"text\":\"a\",\"insertion\":\"x\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}}]",
+                "[\"b\",{\"text\":\"\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}},\"a\"]|[\"b\",{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}}]",
+                "[{\"text\":\"\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}},\"a\"]|[{\"text\":\"\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}},\"a\"]",
+                "[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}},{\"text\":\"a\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}},\"rest\"]|[{\"text\":\"\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}},{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"},\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}},\"rest\"]",
+                "{\"text\":\"x\",\"extra\":[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"}},{\"text\":\"a\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]}|{\"text\":\"x\",\"extra\":[{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"https://x.y\"},\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]}",
+                "[{\"translate\":\"item.x\"},{\"text\":\"Stone\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]|[{\"translate\":\"item.x\"},{\"text\":\"Stone\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]",
+                "{\"text\":\"a\",\"click_event\":{\"action\":\"open_url\",\"url\":\"\"}}|{\"text\":\"a\"}",
+                "{\"text\":\"a\",\"click_event\":{\"action\":\"copy_to_clipboard\",\"value\":\"\"}}|{\"text\":\"a\"}",
+                "{\"text\":\"a\",\"click_event\":{\"action\":\"change_page\",\"page\":\"\"}}|{\"text\":\"a\"}",
+                "{\"text\":\"a\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:air\"}}|{\"text\":\"a\"}",
+                "{\"text\":\"a\",\"hover_event\":{\"action\":\"show_entity\",\"name\":\"Bob\"}}|{\"text\":\"a\"}",
+                "{\"text\":\"a\",\"insertion\":\"\"}|{\"text\":\"a\"}"
+            })
+    void mergesSplitEventsAndDropsDeadOnes(String line, String expected) {
+        assertEquals(expected, repair(line));
+    }
+
+    @Test
+    void mergesATranslatedNameWithItsLiteralCopy() {
+        assertEquals(
+                "[{\"translate\":\"item.x\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]",
+                LenientJson.parse(
+                                "[{\"translate\":\"item.x\"},{\"text\":\"Stone\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}]")
+                        .map(json -> ComponentJsonRepair.repairLine(
+                                json, key -> key.equals("item.x") ? Optional.of("Stone") : Optional.empty()))
+                        .map(Object::toString)
+                        .orElse(null));
     }
 
     @Test
