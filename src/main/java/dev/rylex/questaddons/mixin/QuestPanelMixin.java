@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.rylex.questaddons.client.BoxSelectState;
 import dev.rylex.questaddons.client.GridSnap;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
+import dev.rylex.questaddons.client.QuestWindows;
 import dev.rylex.questaddons.client.SplitView;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.objectweb.asm.Opcodes;
@@ -96,5 +97,12 @@ public abstract class QuestPanelMixin {
     @ModifyVariable(method = "draw", at = @At("STORE"), name = "snap")
     private double questaddons$gridSnap(double original) {
         return GridSnap.SNAP;
+    }
+
+    @Inject(method = "checkMouseOver", at = @At("HEAD"), cancellable = true)
+    private void questaddons$coveredByFloatingWindow(int mouseX, int mouseY, CallbackInfoReturnable<Boolean> cir) {
+        if (QuestWindows.isOverFloating(questScreen, mouseX, mouseY)) {
+            cir.setReturnValue(false);
+        }
     }
 }

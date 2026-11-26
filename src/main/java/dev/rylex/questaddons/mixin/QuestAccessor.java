@@ -1,5 +1,6 @@
 package dev.rylex.questaddons.mixin;
 
+import dev.ftb.mods.ftbquests.quest.DependencyRequirement;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -8,6 +9,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface QuestAccessor {
     @Accessor("optional")
     void questaddons$setOptional(boolean optional);
+
+    @Accessor("dependencyRequirement")
+    DependencyRequirement questaddons$dependencyRequirement();
 
     @Accessor("shape")
     String questaddons$getShape();

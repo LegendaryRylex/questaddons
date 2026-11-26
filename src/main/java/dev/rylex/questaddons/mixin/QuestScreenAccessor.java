@@ -1,7 +1,9 @@
 package dev.rylex.questaddons.mixin;
 
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftbquests.client.gui.quests.ChapterPanel;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import java.util.List;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,6 +12,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(value = QuestScreen.class, remap = false)
 public interface QuestScreenAccessor {
+    @Accessor("selectedChapter")
+    Chapter questaddons$selectedChapter();
+
     @Accessor("grabbed")
     MouseButton questaddons$grabbed();
 
@@ -30,4 +35,7 @@ public interface QuestScreenAccessor {
 
     @Invoker("selectAllQuestsInBox")
     void questaddons$selectAllQuestsInBox(int mouseX, int mouseY, double scrollX, double scrollY);
+
+    @Accessor("chapterPanel")
+    ChapterPanel questaddons$chapterPanel();
 }
