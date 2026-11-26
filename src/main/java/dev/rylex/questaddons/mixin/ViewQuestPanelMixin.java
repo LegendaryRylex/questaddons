@@ -343,22 +343,22 @@ public abstract class ViewQuestPanelMixin {
         SimpleButton replacement =
                 new SimpleButton(self, original.getTitle(), icon, (button, mouse) -> {
                     if (mouse.isRight()) {
-                        DependencyPanels.toggle(self);
-                    } else {
                         DependencyHighlight.toggle(self);
+                    } else {
+                        DependencyPanels.toggle(self);
                     }
                 }) {
                     @Override
                     public void addMouseOverText(TooltipList list) {
                         super.addMouseOverText(list);
-                        String hint = DependencyHighlight.isActive(self)
-                                ? "questaddons.gui.view_dependencies.unhighlight"
-                                : "questaddons.gui.view_dependencies.highlight";
-                        list.add(Component.translatable(hint).withStyle(ChatFormatting.GRAY));
                         String panel = DependencyPanels.isOpen(self)
                                 ? "questaddons.gui.view_dependencies.hide_panel"
                                 : "questaddons.gui.view_dependencies.show_panel";
                         list.add(Component.translatable(panel).withStyle(ChatFormatting.GRAY));
+                        String hint = DependencyHighlight.isActive(self)
+                                ? "questaddons.gui.view_dependencies.unhighlight"
+                                : "questaddons.gui.view_dependencies.highlight";
+                        list.add(Component.translatable(hint).withStyle(ChatFormatting.GRAY));
                     }
                 };
         replacement.setPosAndSize(original.posX, original.posY, original.width, original.height);
