@@ -11,6 +11,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +25,7 @@ import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 public final class ItemLinkTooltip {
     private static final int ICON_SIZE = 16;
     private static final int TEXT_OFFSET = 18;
+    private static final Identifier OPAQUE_STYLE = QuestAddons.id("item_link");
 
     private static ItemStack pending = ItemStack.EMPTY;
 
@@ -57,6 +59,13 @@ public final class ItemLinkTooltip {
                 .filter(title -> title.getString().startsWith(name))
                 .ifPresent(title -> elements.set(
                         0, Either.right(new Title(stack, Language.getInstance().getVisualOrder(title)))));
+    }
+
+    @SubscribeEvent
+    public static void onTooltipTexture(RenderTooltipEvent.Texture event) {
+        if (event.getTexture() == null && event.getComponents().stream().anyMatch(Title.class::isInstance)) {
+            event.setTexture(OPAQUE_STYLE);
+        }
     }
 
     private record Title(ItemStack stack, FormattedCharSequence text)
