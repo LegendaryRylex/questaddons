@@ -12,7 +12,6 @@
     "ChapterImageButtonMixin",
     "ChapterPanelAccessor",
     "ChapterPanelMixin",
-    "CloseViewQuestButtonMixin",
     "ExpandChaptersButtonMixin",
     "KeyMixin",
     "MultilineTextEditorOuterPanelMixin",
