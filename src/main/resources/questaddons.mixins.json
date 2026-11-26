@@ -15,6 +15,7 @@
     "MultilineTextEditorOuterPanelMixin",
     "MultilineTextEditorScreenMixin",
     "MultilineTextEditorToolbarMixin",
+    "OtherButtonsPanelTopMixin",
     "PanelAccessor",
     "PinnedQuestsTrackerMixin",
     "QuestAccessor",

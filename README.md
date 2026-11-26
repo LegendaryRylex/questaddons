@@ -22,6 +22,7 @@ All unbound by default. Set them in Controls under "Quest Addons". Editing keybi
 
 - Placing or moving quests snaps to a 0.5 grid, whatever the Grid Scale.
 - Numpad Enter works wherever Enter does.
+- A Search Quests button in the quest book's side buttons opens the quest search, alongside its keybind.
 - With quests selected and no quest open, the arrow keys move the selection without picking it up first.
 - Right-clicking a selected quest offers Change Shape for all, which sets one shape on every selected quest.
 
