@@ -151,6 +151,10 @@ public enum DescriptionInsert {
         return available.getAsBoolean();
     }
 
+    public String id() {
+        return name;
+    }
+
     public Icon icon() {
         return icon.get();
     }

@@ -1,6 +1,9 @@
 package dev.rylex.questaddons.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
@@ -9,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 public final class QuestAddonsKeys {
@@ -29,6 +33,8 @@ public final class QuestAddonsKeys {
     public static final KeyMapping FIX_JSON = unbound("fix_json");
 
     public static final KeyMapping TOGGLE_PREVIEW = unbound("toggle_preview");
+
+    private static final Map<DescriptionInsert, KeyMapping> INSERTS = new EnumMap<>(DescriptionInsert.class);
 
     private QuestAddonsKeys() {}
 
@@ -51,7 +57,15 @@ public final class QuestAddonsKeys {
             event.register(SPLIT_VIEW_STACKED);
             event.register(FIX_JSON);
             event.register(TOGGLE_PREVIEW);
+            Arrays.stream(DescriptionInsert.values())
+                    .filter(DescriptionInsert::isAvailable)
+                    .forEach(insert -> event.register(
+                            INSERTS.computeIfAbsent(insert, available -> unbound("insert_" + available.id()))));
         });
+    }
+
+    public static @Nullable KeyMapping insert(DescriptionInsert insert) {
+        return INSERTS.get(insert);
     }
 
     public static Optional<Component> hint(KeyMapping mapping) {

@@ -16,8 +16,19 @@ Laying out a quest book means a lot of repeated mouse work that FTB Quests puts 
 | Split View Stacked | None | The same, with one chapter above the other. |
 | JSON Fixer | None | Repairs every broken JSON text line in the quest description editor, the same as its JSON Fixer button. |
 | Live Preview | None | Shows or hides Live Preview in the quest description editor. |
+| Insert Keybind | None | Opens the Insert Keybind dropdown in the quest description editor. |
+| Insert Hover Text | None | Opens the Insert Hover Text prompt in the quest description editor. |
+| Insert Item | None | Opens the Insert Item picker in the quest description editor. |
+| Insert Command Link | None | Opens the Insert Command Link prompt in the quest description editor. |
+| Insert Copy Link | None | Opens the Insert Copy Link prompt in the quest description editor. |
+| Insert Font | None | Opens the Insert Font list in the quest description editor. |
+| Insert Inline Image | None | Opens the Insert Inline Image menu in the quest description editor. |
+| Insert Side Image | None | Opens the Insert Side Image menu in the quest description editor. |
+| Insert Recipe Link | None | Opens the Insert Recipe Link list in the quest description editor. |
+| Insert GuideMe Link | None | Opens the Insert GuideMe Link list in the quest description editor. |
+| Insert Patchouli Link | None | Opens the Insert Patchouli Link list in the quest description editor. |
 
-Editing keybinds need edit mode, and the Smart Filter needs FTB Filter System installed.
+Editing keybinds need edit mode, the Smart Filter needs FTB Filter System installed, Insert Recipe Link needs JEI installed, and the GuideMe and Patchouli keybinds need their mod installed.
 
 ## Other changes
 
