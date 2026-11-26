@@ -18,6 +18,7 @@ import dev.rylex.questaddons.client.DescriptionInsert;
 import dev.rylex.questaddons.client.DescriptionJsonFixer;
 import dev.rylex.questaddons.client.DescriptionPreview;
 import dev.rylex.questaddons.client.ElementInsertion;
+import dev.rylex.questaddons.client.ImageInsertion;
 import dev.rylex.questaddons.client.InsertContext;
 import dev.rylex.questaddons.client.PreviewLayout;
 import dev.rylex.questaddons.client.PreviewTargets;
@@ -188,6 +189,7 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
                 anchorY,
                 selection.indexOf('\n') >= 0 ? "" : selection,
                 element -> questaddons$put(start, end, element),
+                (tag, atLineStart, placeholder) -> questaddons$putImage(start, tag, atLineStart, placeholder),
                 () -> textBox.setFocused(true));
         insert.open(questaddons$insertContext);
     }
@@ -201,6 +203,18 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
                 Math.max(from, Math.min(end, text.length())),
                 element,
                 marked -> ComponentJson.plainLineToJson(marked, element, FTBQuestsClient.holderLookup()));
+        textBox.setSelecting(false);
+        textBox.setText(result.text());
+        textBox.seekCursor(Whence.ABSOLUTE, result.cursor());
+        textBox.setFocused(true);
+    }
+
+    private void questaddons$putImage(int start, String tag, boolean atLineStart, String placeholder) {
+        String text = textBox.getText();
+        ElementInsertion.Result result = ImageInsertion.insert(
+                text, Math.min(start, text.length()), tag, atLineStart, placeholder, line -> DescriptionJsonFixer.fix(
+                                line, FTBQuestsClient.holderLookup())
+                        .text());
         textBox.setSelecting(false);
         textBox.setText(result.text());
         textBox.seekCursor(Whence.ABSOLUTE, result.cursor());

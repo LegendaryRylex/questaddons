@@ -1,5 +1,6 @@
 package dev.rylex.questaddons.client;
 
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableItemStack;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,18 +28,31 @@ public final class InsertContext {
     private final int anchorY;
     private final String selection;
     private final Consumer<String> sink;
+    private final ImageSink imageSink;
     private final Runnable cancel;
 
     private @Nullable EditStringConfigOverlay<String> openPrompt;
 
     public InsertContext(
-            BaseScreen screen, int anchorX, int anchorY, String selection, Consumer<String> sink, Runnable cancel) {
+            BaseScreen screen,
+            int anchorX,
+            int anchorY,
+            String selection,
+            Consumer<String> sink,
+            ImageSink imageSink,
+            Runnable cancel) {
         this.screen = screen;
         this.anchorX = anchorX;
         this.anchorY = anchorY;
         this.selection = selection;
         this.sink = sink;
+        this.imageSink = imageSink;
         this.cancel = cancel;
+    }
+
+    @FunctionalInterface
+    public interface ImageSink {
+        void put(String tag, boolean atLineStart, String placeholder);
     }
 
     public String selection() {
@@ -58,6 +73,24 @@ public final class InsertContext {
 
     public void put(Component element) {
         put(ComponentJson.encode(element, FTBQuestsClient.holderLookup()));
+    }
+
+    public void putImage(String tag, boolean atLineStart, String placeholder) {
+        imageSink.put(tag, atLineStart, placeholder);
+    }
+
+    public void pickImage(Consumer<Identifier> picked) {
+        EditableImageResource config = new EditableImageResource();
+        config.setValue(EditableImageResource.NONE);
+        config.onClicked(screen, MouseButton.LEFT, ok -> {
+            screen.openGui();
+            Identifier image = config.getValue();
+            if (ok && image != null && !image.equals(EditableImageResource.NONE)) {
+                picked.accept(image);
+            } else {
+                cancel.run();
+            }
+        });
     }
 
     public void menu(List<ContextMenuItem> items) {

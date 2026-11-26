@@ -13,6 +13,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -21,6 +22,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.Nullable;
 
 public enum DescriptionInsert {
     KEYBIND("keybind", () -> Icons.KEYBOARD) {
@@ -65,6 +67,24 @@ public enum DescriptionInsert {
                     .withStyle(style -> style.withFont(new FontDescription.Resource(font))))));
         }
     },
+    INLINE_IMAGE("inline_image", () -> Icons.ART) {
+        @Override
+        public void open(InsertContext context) {
+            context.menu(List.of(
+                    choice(context, "questaddons.gui.insert_inline_image.image", INLINE_HEIGHT, null, false),
+                    choice(context, "questaddons.gui.insert_inline_image.item", INLINE_HEIGHT, null, true)));
+        }
+    },
+    SIDE_IMAGE("side_image", () -> Icons.CAMERA) {
+        @Override
+        public void open(InsertContext context) {
+            context.menu(List.of(
+                    choice(context, "questaddons.gui.insert_side_image.left", SIDE_HEIGHT, "left", false),
+                    choice(context, "questaddons.gui.insert_side_image.item_left", SIDE_HEIGHT, "left", true),
+                    choice(context, "questaddons.gui.insert_side_image.right", SIDE_HEIGHT, "right", false),
+                    choice(context, "questaddons.gui.insert_side_image.item_right", SIDE_HEIGHT, "right", true)));
+        }
+    },
     GUIDEME("guideme", () -> Icons.BOOK, GuideMeCompat::isLoaded) {
         @Override
         public void open(InsertContext context) {
@@ -83,6 +103,9 @@ public enum DescriptionInsert {
     private static final String FONT_FOLDER = "font/";
     private static final String JSON = ".json";
     private static final String DOCS_LOCATION = "location";
+    private static final int INLINE_HEIGHT = 8;
+    private static final int SIDE_HEIGHT = 32;
+    private static final List<String> VALIGNS = List.of("top", "center", "bottom");
 
     private final String name;
     private final Supplier<Icon> icon;
@@ -122,6 +145,43 @@ public enum DescriptionInsert {
 
     private String key() {
         return "questaddons.gui.insert_" + name;
+    }
+
+    private static ContextMenuItem choice(
+            InsertContext context, String label, int height, @Nullable String align, boolean item) {
+        Icon icon = item ? ItemIcon.ofItem(Items.GRASS_BLOCK) : Icons.ART;
+        return new ContextMenuItem(Component.translatable(label), icon, button -> {
+            if (align == null) {
+                pick(context, height, null, null, item);
+                return;
+            }
+            context.menu(VALIGNS.stream()
+                    .map(valign -> new ContextMenuItem(
+                            Component.translatable("questaddons.gui.insert_side_image.valign." + valign),
+                            Icon.empty(),
+                            choose -> pick(context, height, align, valign, item)))
+                    .toList());
+        });
+    }
+
+    private static void pick(
+            InsertContext context, int height, @Nullable String align, @Nullable String valign, boolean item) {
+        if (item) {
+            context.pickItem(stack -> context.putImage(
+                    ImageInsertion.tag(
+                            "item:" + BuiltInRegistries.ITEM.getKey(stack.getItem()), height, height, align, valign),
+                    align != null,
+                    PLACEHOLDER));
+        } else {
+            context.pickImage(
+                    image -> context.putImage(imageTag(image, height, align, valign), align != null, PLACEHOLDER));
+        }
+    }
+
+    private static String imageTag(Identifier image, int height, @Nullable String align, @Nullable String valign) {
+        int[] size = TextureSize.of(Icon.getIcon(image.toString())).orElse(new int[] {1, 1});
+        int width = Math.max(1, (int) Math.round((double) height * size[0] / size[1]));
+        return ImageInsertion.tag(image.toString(), width, height, align, valign);
     }
 
     private static List<ContextMenuItem> fontItems(Consumer<Identifier> picked) {

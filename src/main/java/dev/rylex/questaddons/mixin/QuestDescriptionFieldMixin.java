@@ -1,6 +1,7 @@
 package dev.rylex.questaddons.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import dev.rylex.questaddons.client.InlineImages;
 import dev.rylex.questaddons.client.ItemLinkTooltip;
 import dev.rylex.questaddons.client.ItemRecipeClick;
 import java.util.Optional;
@@ -20,6 +21,13 @@ public abstract class QuestDescriptionFieldMixin {
     @Inject(method = "handleCustomClickEvent", at = @At("HEAD"), cancellable = true)
     private void questaddons$runVanillaClicks(Style style, CallbackInfoReturnable<Boolean> cir) {
         if (ItemRecipeClick.show(style) || questaddons$run(style.getClickEvent())) {
+            cir.setReturnValue(true);
+        }
+    }
+
+    @Inject(method = "handleCustomClickEvent", at = @At("HEAD"), cancellable = true)
+    private void questaddons$runImageClick(Style style, CallbackInfoReturnable<Boolean> cir) {
+        if (InlineImages.click(style)) {
             cir.setReturnValue(true);
         }
     }

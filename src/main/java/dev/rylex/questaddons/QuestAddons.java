@@ -1,5 +1,6 @@
 package dev.rylex.questaddons;
 
+import dev.rylex.questaddons.client.ExtendedImage;
 import dev.rylex.questaddons.client.QuestAddonsConfig;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
 import net.minecraft.resources.Identifier;
@@ -16,6 +17,7 @@ public final class QuestAddons {
         if (dist.isClient()) {
             QuestAddonsKeys.init(modBus);
             QuestAddonsConfig.init();
+            ExtendedImage.register();
         }
     }
 
