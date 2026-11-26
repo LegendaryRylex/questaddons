@@ -102,13 +102,6 @@ public abstract class ViewQuestPanelMixin {
     }
 
     @Inject(method = "keyReleased", at = @At("HEAD"), cancellable = true)
-    private void questaddons$keysOnlyWhenHovered(Key key, CallbackInfoReturnable<Boolean> cir) {
-        if ((Object) this instanceof FloatingQuestPanel floating && !floating.isMouseOver()) {
-            cir.setReturnValue(false);
-        }
-    }
-
-    @Inject(method = "keyReleased", at = @At("HEAD"), cancellable = true)
     private void questaddons$swallowGestureRelease(Key key, CallbackInfoReturnable<Boolean> cir) {
         if (!ClickGestureGuard.isArmed() || !key.is(ClickGestureGuard.armedKey())) {
             return;
@@ -118,22 +111,11 @@ public abstract class ViewQuestPanelMixin {
         cir.setReturnValue(true);
     }
 
-    @Inject(method = "mouseScrolled", at = @At("HEAD"), cancellable = true)
-    private void questaddons$scrollOnlyWhenHovered(CallbackInfoReturnable<Boolean> cir) {
-        if ((Object) this instanceof FloatingQuestPanel floating && !floating.isMouseOver()) {
-            cir.setReturnValue(false);
-        }
-    }
-
     @Inject(method = "mousePressed", at = @At("HEAD"), cancellable = true)
     private void questaddons$grabTitleBar(MouseButton button, CallbackInfoReturnable<Boolean> cir) {
         ViewQuestPanel self = (ViewQuestPanel) (Object) this;
         if (quest == null || panelContent == null || !self.isMouseOver()) {
             return;
-        }
-
-        if (self instanceof FloatingQuestPanel floating) {
-            QuestWindows.raise(floating);
         }
 
         if (!button.isLeft()
