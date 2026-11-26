@@ -8,13 +8,13 @@ import dev.rylex.questaddons.client.DescriptionEditor;
 import dev.rylex.questaddons.client.DescriptionInsert;
 import dev.rylex.questaddons.client.EditorButton;
 import dev.rylex.questaddons.client.PreviewLayout;
+import dev.rylex.questaddons.client.QuestAddonsKeys;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,15 +51,11 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
     @Inject(method = "addWidgets", at = @At("TAIL"))
     private void questaddons$addButtons(CallbackInfo ci) {
         questaddons$buttons.clear();
-        String modifier = Util.getPlatform() == Util.OS.OSX ? "Ctrl" : "Alt";
         questaddons$buttons.add(new EditorButton(
                 this,
                 Icons.CHECK.withPadding(2),
                 button -> ((DescriptionEditor) getGui()).questaddons$fixJson(),
-                Component.translatable("questaddons.gui.fix_json"),
-                Component.translatable("questaddons.gui.fix_json.tooltip"),
-                Component.translatable("questaddons.gui.fix_json.hotkey", modifier)
-                        .withStyle(ChatFormatting.DARK_GRAY)));
+                questaddons$tooltip("questaddons.gui.fix_json", QuestAddonsKeys.FIX_JSON)));
         Arrays.stream(DescriptionInsert.values())
                 .filter(DescriptionInsert::isAvailable)
                 .forEach(insert -> questaddons$buttons.add(new EditorButton(
@@ -77,10 +73,7 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                     this,
                     (PreviewLayout.shown() ? Icons.VISIBILITY_HIDE : Icons.VISIBILITY_SHOW).withPadding(2),
                     button -> editor.questaddons$togglePreview(),
-                    Component.translatable("questaddons.gui.preview"),
-                    Component.translatable("questaddons.gui.preview.tooltip"),
-                    Component.translatable("questaddons.gui.preview.hotkey", modifier)
-                            .withStyle(ChatFormatting.DARK_GRAY));
+                    questaddons$tooltip("questaddons.gui.preview", QuestAddonsKeys.TOGGLE_PREVIEW));
             add(questaddons$previewButton);
         }
     }
@@ -115,5 +108,13 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
         if (questaddons$previewButton != null) {
             questaddons$previewButton.setPosAndSize(width - CANCEL_ROOM - BUTTON_SIZE + 2, 1, BUTTON_SIZE, BUTTON_SIZE);
         }
+    }
+
+    @Unique
+    private static Component[] questaddons$tooltip(String key, KeyMapping hotkey) {
+        List<Component> lines =
+                new ArrayList<>(List.of(Component.translatable(key), Component.translatable(key + ".tooltip")));
+        QuestAddonsKeys.hint(hotkey).ifPresent(lines::add);
+        return lines.toArray(Component[]::new);
     }
 }
