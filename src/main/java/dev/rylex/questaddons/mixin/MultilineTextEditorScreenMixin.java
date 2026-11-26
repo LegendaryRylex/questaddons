@@ -3,6 +3,7 @@ package dev.rylex.questaddons.mixin;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableList;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
 import dev.ftb.mods.ftblibrary.client.gui.widget.MultilineTextBox;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
@@ -17,12 +18,13 @@ import dev.rylex.questaddons.client.DescriptionEditor;
 import dev.rylex.questaddons.client.DescriptionInsert;
 import dev.rylex.questaddons.client.DescriptionJsonFixer;
 import dev.rylex.questaddons.client.DescriptionPreview;
+import dev.rylex.questaddons.client.EditorButton;
 import dev.rylex.questaddons.client.ElementInsertion;
 import dev.rylex.questaddons.client.ImageInsertion;
 import dev.rylex.questaddons.client.InsertContext;
 import dev.rylex.questaddons.client.PreviewLayout;
 import dev.rylex.questaddons.client.PreviewTargets;
-import dev.rylex.questaddons.client.QuestAddonsKeys;
+import dev.rylex.questaddons.client.TypedCharGuard;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
@@ -50,6 +52,10 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     @Shadow
     @Final
     private Panel outerPanel;
+
+    @Shadow
+    @Final
+    private Panel toolbarPanel;
 
     @Shadow
     @Final
@@ -149,13 +155,18 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     private void questaddons$handleKeys(Key key, CallbackInfoReturnable<Boolean> cir) {
         if (key.esc() && questaddons$insertContext != null && questaddons$insertContext.dismissPrompt()) {
             cir.setReturnValue(true);
-        } else if (key.matches(QuestAddonsKeys.FIX_JSON)) {
-            questaddons$fixJson();
-            cir.setReturnValue(true);
-        } else if (questaddons$preview != null && key.matches(QuestAddonsKeys.TOGGLE_PREVIEW)) {
-            questaddons$togglePreview();
-            cir.setReturnValue(true);
+            return;
         }
+        toolbarPanel.getWidgets().stream()
+                .filter(EditorButton.class::isInstance)
+                .map(EditorButton.class::cast)
+                .filter(button -> button.pressedBy(key))
+                .findFirst()
+                .ifPresent(button -> {
+                    button.onClicked(MouseButton.LEFT);
+                    TypedCharGuard.swallowNextChar();
+                    cir.setReturnValue(true);
+                });
     }
 
     @Override

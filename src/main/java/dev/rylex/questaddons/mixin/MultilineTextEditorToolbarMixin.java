@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -55,7 +54,8 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                 this,
                 Icons.CHECK.withPadding(2),
                 button -> ((DescriptionEditor) getGui()).questaddons$fixJson(),
-                questaddons$tooltip("questaddons.gui.fix_json", QuestAddonsKeys.FIX_JSON)));
+                QuestAddonsKeys.FIX_JSON,
+                questaddons$tooltip("questaddons.gui.fix_json")));
         Arrays.stream(DescriptionInsert.values())
                 .filter(DescriptionInsert::isAvailable)
                 .forEach(insert -> questaddons$buttons.add(new EditorButton(
@@ -63,6 +63,7 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                         insert.icon().withPadding(2),
                         button -> ((DescriptionEditor) getGui())
                                 .questaddons$insert(insert, button.getX(), button.getY() + button.height),
+                        QuestAddonsKeys.insert(insert),
                         insert.title(),
                         insert.tooltip())));
         questaddons$buttons.forEach(this::add);
@@ -73,7 +74,8 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
                     this,
                     (PreviewLayout.shown() ? Icons.VISIBILITY_HIDE : Icons.VISIBILITY_SHOW).withPadding(2),
                     button -> editor.questaddons$togglePreview(),
-                    questaddons$tooltip("questaddons.gui.preview", QuestAddonsKeys.TOGGLE_PREVIEW));
+                    QuestAddonsKeys.TOGGLE_PREVIEW,
+                    questaddons$tooltip("questaddons.gui.preview"));
             add(questaddons$previewButton);
         }
     }
@@ -111,10 +113,7 @@ public abstract class MultilineTextEditorToolbarMixin extends Panel {
     }
 
     @Unique
-    private static Component[] questaddons$tooltip(String key, KeyMapping hotkey) {
-        List<Component> lines =
-                new ArrayList<>(List.of(Component.translatable(key), Component.translatable(key + ".tooltip")));
-        QuestAddonsKeys.hint(hotkey).ifPresent(lines::add);
-        return lines.toArray(Component[]::new);
+    private static Component[] questaddons$tooltip(String key) {
+        return new Component[] {Component.translatable(key), Component.translatable(key + ".tooltip")};
     }
 }
