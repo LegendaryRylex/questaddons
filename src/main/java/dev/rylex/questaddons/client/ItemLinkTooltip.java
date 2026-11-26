@@ -27,6 +27,7 @@ import org.joml.Matrix4f;
 public final class ItemLinkTooltip {
     private static final int ICON_SIZE = 16;
     private static final int TEXT_OFFSET = 18;
+    private static final int OPAQUE = 0xFF000000;
 
     private static ItemStack pending = ItemStack.EMPTY;
 
@@ -62,6 +63,14 @@ public final class ItemLinkTooltip {
                 .filter(title -> title.getString().startsWith(name))
                 .ifPresent(title -> elements.set(
                         0, Either.right(new Title(stack, Language.getInstance().getVisualOrder(title)))));
+    }
+
+    @SubscribeEvent
+    public static void onTooltipColor(RenderTooltipEvent.Color event) {
+        if (event.getComponents().stream().anyMatch(Title.class::isInstance)) {
+            event.setBackgroundStart(event.getBackgroundStart() | OPAQUE);
+            event.setBackgroundEnd(event.getBackgroundEnd() | OPAQUE);
+        }
     }
 
     private record Title(ItemStack stack, FormattedCharSequence text)
