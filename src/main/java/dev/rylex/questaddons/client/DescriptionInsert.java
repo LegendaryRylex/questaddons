@@ -41,9 +41,11 @@ public enum DescriptionInsert {
     ITEM("item", () -> Icons.DIAMOND) {
         @Override
         public void open(InsertContext context) {
-            context.pickItem(stack -> context.put(context.label(stack.getHoverName())
-                    .withStyle(style -> style.withHoverEvent(
-                            new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(stack))))));
+            context.pickItemOrFluid(target -> context.put(context.label(target.name())
+                    .withStyle(style -> target.isFluid()
+                            ? FluidLink.apply(style, target.fluid())
+                            : style.withHoverEvent(new HoverEvent(
+                                    HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(target.stack()))))));
         }
     },
     COMMAND("command", () -> ItemIcon.getItemIcon(Items.COMMAND_BLOCK)) {

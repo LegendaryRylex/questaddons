@@ -21,6 +21,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 @EventBusSubscriber(modid = QuestAddons.MOD_ID, value = Dist.CLIENT)
@@ -29,18 +30,21 @@ public final class ItemLinkTooltip {
     private static final int TEXT_OFFSET = 18;
     private static final int OPAQUE = 0xFF000000;
 
-    private static ItemStack pending = ItemStack.EMPTY;
+    private static @Nullable RecipeTarget pending;
 
     private ItemLinkTooltip() {}
 
     public static void hover(Optional<Style> style) {
-        pending = style.map(ItemLinkTooltip::item).orElse(ItemStack.EMPTY);
+        pending = style.flatMap(
+                        found -> FluidLink.fluid(found).map(RecipeTarget::fluid).or(() -> item(found)))
+                .orElse(null);
     }
 
-    private static ItemStack item(Style style) {
+    private static Optional<RecipeTarget> item(Style style) {
         HoverEvent event = style.getHoverEvent();
         HoverEvent.ItemStackInfo info = event == null ? null : event.getValue(HoverEvent.Action.SHOW_ITEM);
-        return info == null ? ItemStack.EMPTY : info.getItemStack();
+        ItemStack stack = info == null ? ItemStack.EMPTY : info.getItemStack();
+        return stack.isEmpty() ? Optional.empty() : Optional.of(RecipeTarget.item(stack));
     }
 
     @SubscribeEvent
@@ -50,19 +54,19 @@ public final class ItemLinkTooltip {
 
     @SubscribeEvent
     public static void onGatherComponents(RenderTooltipEvent.GatherComponents event) {
-        ItemStack stack = pending;
-        pending = ItemStack.EMPTY;
+        RecipeTarget target = pending;
+        pending = null;
         List<Either<FormattedText, TooltipComponent>> elements = event.getTooltipElements();
-        if (stack.isEmpty() || elements.isEmpty()) {
+        if (target == null || elements.isEmpty()) {
             return;
         }
 
-        String name = stack.getHoverName().getString();
+        String name = target.name().getString();
         elements.getFirst()
                 .left()
                 .filter(title -> title.getString().startsWith(name))
                 .ifPresent(title -> elements.set(
-                        0, Either.right(new Title(stack, Language.getInstance().getVisualOrder(title)))));
+                        0, Either.right(new Title(target, Language.getInstance().getVisualOrder(title)))));
     }
 
     @SubscribeEvent
@@ -84,7 +88,7 @@ public final class ItemLinkTooltip {
         return event.getComponents().stream().anyMatch(Title.class::isInstance);
     }
 
-    private record Title(ItemStack stack, FormattedCharSequence text)
+    private record Title(RecipeTarget target, FormattedCharSequence text)
             implements TooltipComponent, ClientTooltipComponent {
         @Override
         public int getHeight() {
@@ -113,7 +117,11 @@ public final class ItemLinkTooltip {
 
         @Override
         public void renderImage(Font font, int x, int y, GuiGraphics graphics) {
-            graphics.renderItem(stack, x, y);
+            if (target.isFluid()) {
+                target.icon().draw(graphics, x, y, ICON_SIZE, ICON_SIZE);
+            } else {
+                graphics.renderItem(target.stack(), x, y);
+            }
         }
     }
 }
