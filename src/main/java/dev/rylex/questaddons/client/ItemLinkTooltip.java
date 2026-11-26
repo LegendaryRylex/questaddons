@@ -66,11 +66,22 @@ public final class ItemLinkTooltip {
     }
 
     @SubscribeEvent
+    public static void onTooltipPre(RenderTooltipEvent.Pre event) {
+        if (isItemLink(event)) {
+            event.getGraphics().setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        }
+    }
+
+    @SubscribeEvent
     public static void onTooltipColor(RenderTooltipEvent.Color event) {
-        if (event.getComponents().stream().anyMatch(Title.class::isInstance)) {
+        if (isItemLink(event)) {
             event.setBackgroundStart(event.getBackgroundStart() | OPAQUE);
             event.setBackgroundEnd(event.getBackgroundEnd() | OPAQUE);
         }
+    }
+
+    private static boolean isItemLink(RenderTooltipEvent event) {
+        return event.getComponents().stream().anyMatch(Title.class::isInstance);
     }
 
     private record Title(ItemStack stack, FormattedCharSequence text)
