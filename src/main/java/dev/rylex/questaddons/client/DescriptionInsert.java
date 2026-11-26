@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.rylex.questaddons.compat.guideme.GuideMeCompat;
+import dev.rylex.questaddons.compat.jei.JeiCompat;
 import dev.rylex.questaddons.compat.patchouli.PatchouliCompat;
 import java.util.List;
 import java.util.Optional;
@@ -85,6 +86,17 @@ public enum DescriptionInsert {
                     choice(context, "questaddons.gui.insert_side_image.item_right", SIDE_HEIGHT, "right", true)));
         }
     },
+    RECIPE("recipe", () -> ItemIcon.ofItem(Items.CRAFTING_TABLE), JeiCompat::isLoaded) {
+        @Override
+        public void open(InsertContext context) {
+            context.menu(JeiCompat.recipeTargets().stream()
+                    .map(target -> new ContextMenuItem(
+                            MenuLabel.of(target.name().getString(), target.id()),
+                            target.icon(),
+                            button -> context.menu(recipeItems(target, context))))
+                    .toList());
+        }
+    },
     GUIDEME("guideme", () -> Icons.BOOK, GuideMeCompat::isLoaded) {
         @Override
         public void open(InsertContext context) {
@@ -105,6 +117,7 @@ public enum DescriptionInsert {
     private static final String DOCS_LOCATION = "location";
     private static final int INLINE_HEIGHT = 8;
     private static final int SIDE_HEIGHT = 32;
+    private static final int RECIPE_ID_WIDTH = 300;
     private static final List<String> VALIGNS = List.of("top", "center", "bottom");
 
     private final String name;
@@ -202,6 +215,22 @@ public enum DescriptionInsert {
                                         .withStyle(style -> style.withFont(new FontDescription.Resource(font)))),
                         Icon.empty(),
                         button -> picked.accept(font)))
+                .toList();
+    }
+
+    private static List<ContextMenuItem> recipeItems(RecipeTarget target, InsertContext context) {
+        List<RecipeLink> links = JeiCompat.recipesMaking(target);
+        if (links.isEmpty()) {
+            return List.of(new ContextMenuItem(
+                    Component.translatable("questaddons.gui.insert_recipe.none"), Icon.empty(), button -> {}));
+        }
+        return links.stream()
+                .map(link -> new ContextMenuItem(
+                        MenuLabel.of(link.category().getString(), link.recipe(), RECIPE_ID_WIDTH),
+                        link.catalyst().isEmpty() ? Icon.empty() : ItemIcon.ofItemStack(link.catalyst()),
+                        button -> context.put(context.label(target.name()).withStyle(style -> style.withUnderlined(true)
+                                .withClickEvent(RecipeLinkClick.of(link.value()))
+                                .withHoverEvent(new HoverEvent.ShowText(link.category()))))))
                 .toList();
     }
 

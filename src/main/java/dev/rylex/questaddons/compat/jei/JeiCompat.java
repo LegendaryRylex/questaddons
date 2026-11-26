@@ -1,5 +1,8 @@
 package dev.rylex.questaddons.compat.jei;
 
+import dev.rylex.questaddons.client.RecipeLink;
+import dev.rylex.questaddons.client.RecipeTarget;
+import java.util.List;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
@@ -23,5 +26,17 @@ public final class JeiCompat {
 
     public static void showRecipes(ItemStack stack, boolean uses) {
         QuestAddonsJeiPlugin.showRecipes(stack, uses);
+    }
+
+    public static List<RecipeTarget> recipeTargets() {
+        return JeiRecipeLinks.targets();
+    }
+
+    public static List<RecipeLink> recipesMaking(RecipeTarget target) {
+        return JeiRecipeLinks.making(target);
+    }
+
+    public static boolean openRecipeLink(String value) {
+        return JeiRecipeLinks.open(value);
     }
 }

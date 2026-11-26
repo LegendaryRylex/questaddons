@@ -12,9 +12,13 @@ public final class MenuLabel {
     private MenuLabel() {}
 
     public static Component of(String name, String detail) {
+        return of(name, detail, MAX_DETAIL_WIDTH);
+    }
+
+    public static Component of(String name, String detail, int detailWidth) {
         Font font = Minecraft.getInstance().font;
         return Component.literal(font.plainSubstrByWidth(name, MAX_NAME_WIDTH))
-                .append(Component.literal("  " + font.plainSubstrByWidth(detail, MAX_DETAIL_WIDTH))
+                .append(Component.literal("  " + font.plainSubstrByWidth(detail, detailWidth))
                         .withStyle(ChatFormatting.DARK_GRAY));
     }
 }
