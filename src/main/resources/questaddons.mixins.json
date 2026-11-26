@@ -22,6 +22,7 @@
     "QuestButtonMixin",
     "QuestDescriptionConfigMixin",
     "QuestDescriptionFieldMixin",
+    "QuestObjectButtonSearchMixin",
     "QuestPanelMixin",
     "QuestScreenAccessor",
     "QuestScreenArrowMoveMixin",
