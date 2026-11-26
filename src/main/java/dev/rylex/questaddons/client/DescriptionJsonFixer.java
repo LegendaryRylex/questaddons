@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 
@@ -26,8 +27,9 @@ public final class DescriptionJsonFixer {
             if (!ComponentJsonRepair.looksLikeComponent(line)) {
                 continue;
             }
-            Optional<JsonElement> repaired =
-                    LenientJson.parse(line).map(ComponentJsonRepair::repairLine).filter(json -> parses(json, provider));
+            Optional<JsonElement> repaired = LenientJson.parse(line)
+                    .map(json -> ComponentJsonRepair.repairLine(json, DescriptionJsonFixer::name))
+                    .filter(json -> parses(json, provider));
             if (repaired.isEmpty()) {
                 unfixable.add(i + 1);
             } else {
@@ -66,6 +68,11 @@ public final class DescriptionJsonFixer {
                 && strict(line)
                         .filter(current -> current.equals(repaired) && parses(current, provider))
                         .isPresent();
+    }
+
+    private static Optional<String> name(String key) {
+        Language language = Language.getInstance();
+        return language.has(key) ? Optional.of(language.getOrDefault(key)) : Optional.empty();
     }
 
     private static boolean parses(JsonElement json, HolderLookup.Provider provider) {
