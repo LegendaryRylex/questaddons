@@ -85,10 +85,6 @@ public final class QuestWindows {
     }
 
     public static void save(QuestScreen screen) {
-        if (screen instanceof SplitViewPane) {
-            return;
-        }
-
         List<SavedWindow> windows = new ArrayList<>();
         for (FloatingQuestPanel panel : floating(screen)) {
             Quest quest = panel.getViewedQuest();
@@ -100,12 +96,11 @@ public final class QuestWindows {
     }
 
     private static void restore(QuestScreen screen) {
-        boolean pane = screen instanceof SplitViewPane;
-        FLOATING.keySet().removeIf(other -> other != screen && (other instanceof SplitViewPane) == pane);
+        FLOATING.keySet().removeIf(other -> other != screen);
         List<FloatingQuestPanel> panels = new ArrayList<>();
         FLOATING.put(screen, panels);
         ClientQuestFile file = ClientQuestFile.INSTANCE;
-        if (file == null || pane) {
+        if (file == null) {
             return;
         }
 

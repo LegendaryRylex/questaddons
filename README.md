@@ -14,8 +14,6 @@ All unbound by default. Set them in Controls under "Quest Addons". Editing keybi
 | Move Selection | Hold and left-click a quest or chapter image to pick up the selection and move it. The clicked object joins the selection. Images with Lock Position stay put. |
 | Toggle Optional | Press over a task to make it optional or required. Hold and right-click a quest to toggle the quest. |
 | Smart Filter | Gives an FTB Filter System smart filter matching an open quest's item tasks, or your hotbar from the inventory (the whole inventory with Shift). Creative only, needs FTB Filter System. |
-| Split View | Opens a second chapter side by side. Both halves are editable, and the split survives a trip to the recipe viewer. Press again to close. |
-| Split View Stacked | Same, with one chapter above the other. |
 | JSON Fixer | Runs the description editor's JSON Fixer. |
 | Live Preview | Shows or hides the description editor's Live Preview. |
 | Insert Keybind, Hover Text, Item, Command Link, Copy Link, Font, Inline Image, Side Image, Recipe Link, GuideMe Link, Patchouli Link | Opens that insert button in the description editor. Recipe Link needs JEI, GuideMe Link and Patchouli Link need their mod. |

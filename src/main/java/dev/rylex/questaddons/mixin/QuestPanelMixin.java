@@ -1,8 +1,6 @@
 package dev.rylex.questaddons.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestPanel;
@@ -11,9 +9,6 @@ import dev.rylex.questaddons.client.BoxSelectState;
 import dev.rylex.questaddons.client.GridSnap;
 import dev.rylex.questaddons.client.QuestAddonsKeys;
 import dev.rylex.questaddons.client.QuestWindows;
-import dev.rylex.questaddons.client.SplitView;
-import net.minecraft.client.gui.GuiGraphics;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -55,46 +50,6 @@ public abstract class QuestPanelMixin {
         ((QuestScreenAccessor) questScreen)
                 .questaddons$selectAllQuestsInBox(
                         self.getMouseX(), self.getMouseY(), self.getScrollX(), self.getScrollY());
-    }
-
-    @Inject(method = "drawOffsetBackground", at = @At("HEAD"))
-    private void questaddons$clipToSplitHalf(
-            GuiGraphics graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
-        if (SplitView.isSplitHalf(questScreen)) {
-            int left = questScreen.getX();
-            int top = questScreen.getY();
-            graphics.enableScissor(left, top, left + questScreen.width, top + questScreen.height);
-        }
-    }
-
-    @Inject(method = "drawOffsetBackground", at = @At("RETURN"))
-    private void questaddons$endSplitHalfClip(
-            GuiGraphics graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
-        if (SplitView.isSplitHalf(questScreen)) {
-            graphics.disableScissor();
-        }
-    }
-
-    @ModifyExpressionValue(
-            method = "draw",
-            at =
-                    @At(
-                            value = "FIELD",
-                            target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;width:I",
-                            opcode = Opcodes.GETFIELD))
-    private int questaddons$centreOnOwningScreenX(int original) {
-        return original + 2 * questScreen.getX();
-    }
-
-    @ModifyExpressionValue(
-            method = "draw",
-            at =
-                    @At(
-                            value = "FIELD",
-                            target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;height:I",
-                            opcode = Opcodes.GETFIELD))
-    private int questaddons$centreOnOwningScreenY(int original) {
-        return original + 2 * questScreen.getY();
     }
 
     @ModifyVariable(method = "draw", at = @At("STORE"), name = "snap")
