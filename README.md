@@ -1,54 +1,72 @@
 # Quest Addons
 
-Editor conveniences for FTB Quests.
+Editor tools for FTB Quests. Client-side only: edits go through FTB Quests' own editor packets, so nothing is needed on the server.
 
-Laying out a quest book means a lot of repeated mouse work that FTB Quests puts behind fixed gestures or no gesture at all. This addon puts those on keybinds, all unbound by default and set from the vanilla Controls screen under "Quest Addons".
+Requires NeoForge for Minecraft 1.21.1 and FTB Quests 2101.1.37 or newer.
 
 ## Keybinds
 
-| Keybind | Default | What it does |
-|---|---|---|
-| Box Select | None | Hold and drag to select quests with a box. |
-| Move Selection | None | Hold and left-click a quest or chapter image to pick up the selection and move it, adding the clicked object if it was not selected. Images with Lock Position set stay put. |
-| Toggle Optional | None | Press while hovering a task to make it optional or required, or hold and right-click a quest to toggle the quest. |
-| Smart Filter | None | In an open quest, gives an FTB Filter System smart filter matching everything its item tasks ask for. In your inventory, matches the hotbar, or the whole inventory with Shift. Creative mode only. |
-| Split View | None | Opens a second chapter side by side with the first. Both halves are live and editable, and the split survives recipe viewer round trips. Press again to close it. |
-| Split View Stacked | None | The same, with one chapter above the other. |
-| JSON Fixer | None | Repairs every broken JSON text line in the quest description editor, the same as its JSON Fixer button. |
-| Live Preview | None | Shows or hides Live Preview in the quest description editor. |
-| Insert Keybind | None | Opens the Insert Keybind dropdown in the quest description editor. |
-| Insert Hover Text | None | Opens the Insert Hover Text prompt in the quest description editor. |
-| Insert Item | None | Opens the Insert Item picker in the quest description editor. |
-| Insert Command Link | None | Opens the Insert Command Link prompt in the quest description editor. |
-| Insert Copy Link | None | Opens the Insert Copy Link prompt in the quest description editor. |
-| Insert Font | None | Opens the Insert Font list in the quest description editor. |
-| Insert Inline Image | None | Opens the Insert Inline Image menu in the quest description editor. |
-| Insert Side Image | None | Opens the Insert Side Image menu in the quest description editor. |
-| Insert Recipe Link | None | Opens the Insert Recipe Link list in the quest description editor. |
-| Insert GuideMe Link | None | Opens the Insert GuideMe Link list in the quest description editor. |
-| Insert Patchouli Link | None | Opens the Insert Patchouli Link list in the quest description editor. |
+All unbound by default. Set them in Controls under "Quest Addons". Editing keybinds need edit mode.
 
-Editing keybinds need edit mode, the Smart Filter needs FTB Filter System installed, Insert Recipe Link needs JEI installed, and the GuideMe and Patchouli keybinds need their mod installed.
+| Keybind | What it does |
+|---|---|
+| Box Select | Hold and drag to select quests with a box. |
+| Move Selection | Hold and left-click a quest or chapter image to pick up the selection and move it. The clicked object joins the selection. Images with Lock Position stay put. |
+| Toggle Optional | Press over a task to make it optional or required. Hold and right-click a quest to toggle the quest. |
+| Smart Filter | Gives an FTB Filter System smart filter matching an open quest's item tasks, or your hotbar from the inventory (the whole inventory with Shift). Creative only, needs FTB Filter System. |
+| Split View | Opens a second chapter side by side. Both halves are editable, and the split survives a trip to the recipe viewer. Press again to close. |
+| Split View Stacked | Same, with one chapter above the other. |
+| JSON Fixer | Runs the description editor's JSON Fixer. |
+| Live Preview | Shows or hides the description editor's Live Preview. |
+| Insert Keybind, Hover Text, Item, Command Link, Copy Link, Font, Inline Image, Side Image, Recipe Link, GuideMe Link, Patchouli Link | Opens that insert button in the description editor. Recipe Link needs JEI, GuideMe Link and Patchouli Link need their mod. |
 
-## Other changes
+## Quest book
 
-- Placing or moving quests always snaps to a 0.5 grid, whatever the quest book's Grid Scale is set to.
-- Numpad Enter is accepted anywhere the quest book accepts Enter.
+- Placing or moving quests snaps to a 0.5 grid, whatever the Grid Scale.
+- Numpad Enter works wherever Enter does.
 - The quest object picker also searches by ID, with or without the leading `#`.
-- Right-clicking a selected quest offers Change Shape for all, which opens a sub-menu of every shape, the current one ticked; picking one applies it to every selected quest.
-- The quest description editor gets a JSON Fixer button next to Convert to JSON. It repairs every broken JSON text line in the description: missing or extra brackets, trailing or missing commas, single or curly quotes, unquoted keys, stray quotes inside text, miscased colour names, string booleans, click and hover events written in the newer snake_case format, and text that holds a pasted copy of its own JSON element. Formatting codes inside JSON text, such as `&d` or `&#FF8800`, become JSON colours and styles of their own. Lines it cannot repair are listed and the cursor jumps to the first one.
-- The quest description editor gets an Insert Keybind button next to the JSON Fixer. It opens a searchable dropdown of every keybind in the game, bound or not, and adds the one you pick as a JSON keybind entry at the cursor. It shows each player their own key in yellow, with the default key on hover. On a plain text line the line becomes JSON with its colours kept, and the selection, if any, is replaced.
-- The description editor also gets a button for each of the other text elements a quest description can use, inserted the same way as a keybind. Insert Hover Text wraps the selection in a tooltip. Insert Item opens the item picker and adds the item's name with its tooltip on hover. In the quest book its tooltip shows the item's icon, and clicking it opens the item's recipes in JEI, REI or EMI through FTB XMod Compat. Insert Command Link adds a link that runs a command. Insert Copy Link adds a link that copies text to the clipboard. Insert Font applies any loaded font, picked from a list that previews each one. With JEI installed, Insert Recipe Link lists every item JEI shows, searchable by name or ID, then every recipe that makes the picked item, each with its machine's icon and recipe ID, and adds the item's name as a link that opens that one recipe in JEI, with the recipe type on hover. With GuideMe or Patchouli installed, Insert GuideMe Link and Insert Patchouli Link list every page or entry and add a `docs:` link that opens it, which needs FTB XMod Compat to work in game. Links and tooltips wrap the selection when there is one, also inside a JSON element's text, where the selected part takes the new style and the text around it keeps its own. When the window is too narrow for one row, the buttons move to a second toolbar row.
-- Quest descriptions can show images inside text. An `{image:...}` tag sharing a line with text sits in the line like a word, and the line grows to fit a tall one. One with `align:left` or `align:right` sits on that side of its paragraph, and the text wraps beside it and carries on under it at full width. A line can also hold several images side by side. The tag works inside JSON text too, as `{"text": "{image:...}"}`. An item or block shows in place of an image with `{image:item:minecraft:diamond ...}`, drawn as it is in an inventory, with the item's tooltip on hover and its recipes on click. A side image or item takes `valign:top`, `valign:center` or `valign:bottom` to sit at the top, middle or bottom of its paragraph, and `keep_aspect:true` fits an image inside its width and height at its own proportions instead of stretching it. Hover text and click actions on these images work as they do on a whole-line image, and lines holding only one image look as they did before. The editor gets two buttons for them: Insert Inline Image adds a picked image, item or block at the cursor at text height, and Insert Side Image puts one on the left or right of the cursor's paragraph, at its top, middle or bottom. On a JSON line the image goes in as a JSON element and the line is tidied afterwards; on an empty line Insert Side Image also adds placeholder text.
-- The quest description editor gets a Live Preview button that splits the editor in two, with the text on the left and the description on the right as players will see it. The preview updates as you type, follows the page the cursor is on, shows hover text, and sits at the same width as the quest window, so lines wrap where players will see them wrap. The editor opens with it shown; turn off Open Live Preview with the Editor under Quest Addons in FTB Quests' client settings to have it open hidden.
-- Dragging a quest window by its title bar pops it out into a floating window that stays open while you keep using the quest book. Clicking another quest opens it alongside, so several quests can be open at once. Each floating window has its own close button, and clicking one brings it to the front. The lock button in a quest window's header floats it where it is, and on a floating window puts it back in the middle. Floating windows come back where you left them when you reopen the quest book.
-- A quest window's Collapse button, beside its close and pin buttons, hides the subtitle and description and shrinks the window to its title, tasks and rewards. Clicking it again expands the window. Collapsed quests stay collapsed when you reopen them, in docked and floating windows alike.
-- The Pinned Quests panel shows each quest's and task's icon beside its progress. In the quest book, any container screen or JEI's recipe screens it drags by its title bar, and right-clicking the title bar puts it back where the FTB Quests settings place it. The spot you drag it to is used everywhere, over the world too. Clicking a quest opens it in the quest book, clicking a task does what it does in the quest window, and with JEI installed JEI's keys work on a pinned item task. Items its unfinished tasks ask for are highlighted in an open container.
-- With NEI Features for JEI installed, its item keys work on a pinned item task and on any item in the quest book: bookmark (A), chat link (Ctrl + L), pull from containers (V), autocraft (Shift + C), and copy the name, ID or tags (Ctrl + C, Ctrl + X, Ctrl + D). On a pinned task, Ctrl + A, Ctrl + L and V use the amount the task still needs. In edit mode the quest book keeps its own Ctrl keys.
-- Left-clicking a quest window's View Dependencies arrow pops the window out to the right edge and outlines its dependencies in the book: the quests in the current chapter, the chapter list entry of any other chapter holding one, or its chapter group when that group is collapsed. Left-click again to clear the outlines.
-- A quest with unfinished dependencies opens with a Dependencies panel beside its window, listing each dependency with its icon and tasks. Once every dependency is done, the panel no longer opens by itself. With more than one dependency, a Show button under the heading switches the list between Pending, Completed and All, and its tooltip says whether the quest needs all of them or only some. Done dependencies are ticked and shrink to their title. Right-clicking the View Dependencies arrow shows or hides the panel. It starts on Pending when it opens by itself, and on All when you open it. Clicking a dependency or one of its tasks opens that quest in a floating window next to the first, which floats too. Clicking a chapter dependency switches to that chapter. Quests that hide their details until they can be started show no tasks, and hidden quests are only counted.
-- Picking a quest from the View Dependants list opens it in a floating window, keeping the current quest open beside it.
+- Right-clicking a selected quest offers Change Shape for all, which sets one shape on every selected quest.
 
-Client-side only. Nothing is required on the server; edits go through FTB Quests' own editor packets.
+## Description editor
 
-NeoForge mod for Minecraft 1.21.1. Requires FTB Quests 2101.1.37 or newer.
+- **JSON Fixer**, next to Convert to JSON, repairs every broken JSON text line: missing or extra brackets, trailing or missing commas, single or curly quotes, unquoted keys, stray quotes in text, miscased colour names, string booleans, click and hover events in the newer snake_case format, text holding a pasted copy of its own element, click and hover events that do nothing, and a link, tooltip, shift-click text or style split across two copies of the same text. A link or tooltip on empty text moves to the text after it. Formatting codes inside JSON text, such as `&d` or `&#FF8800`, become JSON styles. Lines it can't repair are listed and the cursor jumps to the first.
+- **Insert buttons** add a text element as JSON at the cursor. A plain text line becomes JSON with its colours kept. Links and tooltips wrap the selection, also inside a JSON element's text, where only the selected part takes the new style. The buttons move to a second row when the window is narrow.
+  - Keybind: a searchable list of every keybind, bound or not. Each player sees their own key in yellow, with the default on hover.
+  - Hover Text: wraps the selection in a tooltip.
+  - Item: the item's name with its tooltip. In the quest book the tooltip shows its icon, and clicking opens its recipes in JEI, REI or EMI (needs FTB XMod Compat).
+  - Command Link and Copy Link: a link that runs a command or copies text.
+  - Font: any loaded font, from a list that previews each one.
+  - Recipe Link (JEI): pick an item or fluid, then one recipe that makes it, shown with its machine's icon and recipe ID. A bucket also lists the recipes that make its fluid. Adds the name as a link to that recipe, with the recipe type on hover.
+  - GuideMe Link and Patchouli Link: pick a page or entry to add a `docs:` link to it (needs FTB XMod Compat in game).
+- **Live Preview** splits the editor, with the text on the left and the rendered description on the right at quest window width. It updates as you type, follows the cursor's page and shows hover text. It opens shown; turn off Open Live Preview with the Editor under Quest Addons in FTB Quests' client settings to start hidden.
+
+## Images in text
+
+- An `{image:...}` tag on a line with text sits inline like a word, and the line grows to fit it. Several can share a line. It works inside JSON text as `{"text": "{image:...}"}`.
+- `align:left` or `align:right` puts it beside its paragraph, with the text wrapping around it.
+- `valign:top`, `valign:center` or `valign:bottom` sets a side image's position in its paragraph.
+- `keep_aspect:true` fits the image inside its width and height without stretching it.
+- `{image:item:minecraft:diamond ...}` draws an item or block as it looks in an inventory, with its tooltip on hover and its recipes on click.
+- Hover text and click actions work as they do on a whole-line image.
+- Insert Inline Image adds an image, item or block at the cursor at text height. Insert Side Image puts one left or right of the cursor's paragraph, at its top, middle or bottom, and adds placeholder text on an empty line.
+
+## Quest windows
+
+- Dragging a quest window by its title bar floats it. Floating windows stay open while you use the book, so several quests can be open at once. Each has its own close button, clicking one brings it to the front, and they reopen where you left them.
+- The lock button in the header floats a docked window in place, or docks a floating one.
+- The Collapse button shrinks a window to its title, tasks and rewards. Collapsed quests stay collapsed when reopened.
+- Picking a quest from View Dependants opens it in a floating window beside the current one.
+
+## Dependencies
+
+- Right-clicking the View Dependencies arrow moves the window to the right edge and outlines its dependencies: quests in the current chapter, the chapter list entry of another chapter holding one, or the chapter group when it is collapsed. Right-click again to clear.
+- A quest with unfinished dependencies opens with a Dependencies panel listing each one with its icon and tasks. Left-clicking the arrow shows or hides it.
+- With more than one dependency, a Show button switches the list between Pending, Completed and All, and its tooltip says whether all or only some are needed. It starts on Pending when the panel opens by itself, and on All when you open it.
+- Done dependencies are ticked and shrink to their title. Clicking a dependency or one of its tasks opens it in a floating window, and a chapter dependency switches to that chapter. Quests that hide their details show no tasks, and hidden quests are only counted.
+
+## Pinned Quests
+
+- Shows each quest's and task's icon beside its progress.
+- Drags by its title bar in the quest book, any container screen and JEI's recipe screens. The spot you pick is used everywhere, over the world too. Right-clicking the title bar resets it.
+- Clicking a quest opens it, and clicking a task does what it does in the quest window. JEI's keys work on a pinned item task. Items its unfinished tasks ask for are highlighted in an open container.
+- With NEI Features for JEI, its keys work on a pinned item task and any item in the quest book: bookmark (A), chat link (Ctrl + L), pull from containers (V), autocraft (Shift + C), and copy the name, ID or tags (Ctrl + C, Ctrl + X, Ctrl + D). On a pinned task, Ctrl + A, Ctrl + L and V use the amount the task still needs. In edit mode the quest book keeps its own Ctrl keys.

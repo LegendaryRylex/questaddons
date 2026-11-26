@@ -36,9 +36,15 @@ class ReadmeKeybindsTest {
             if (!inSection || !line.startsWith("|") || line.startsWith("|---")) {
                 continue;
             }
-            String name = line.substring(1, line.indexOf('|', 1)).trim();
-            if (!name.equals("Keybind")) {
-                documented.add(name);
+            String cell = line.substring(1, line.indexOf('|', 1)).trim();
+            if (cell.equals("Keybind")) {
+                continue;
+            }
+            String[] names = cell.split(",\\s*");
+            String prefix = names[0].contains(" ") ? names[0].substring(0, names[0].indexOf(' ') + 1) : "";
+            documented.add(names[0]);
+            for (int i = 1; i < names.length; i++) {
+                documented.add(names[i].startsWith(prefix) ? names[i] : prefix + names[i]);
             }
         }
 
