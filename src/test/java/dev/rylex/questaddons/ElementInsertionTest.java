@@ -81,6 +81,51 @@ class ElementInsertionTest {
                 "{@pagebreak}\n" + KEY + "\nnext", insert("{@page|break}\nnext").text());
     }
 
+    private static String wrap(String marked, String style) {
+        int start = marked.indexOf('|');
+        int end = marked.lastIndexOf('|') - 1;
+        String text = marked.replace("|", "");
+        String selection = text.substring(start, end);
+        String element = "{\"text\": " + new com.google.gson.JsonPrimitive(selection) + ", " + style + "}";
+        return ElementInsertion.insert(text, start, end, element, plain -> "PLAIN:" + plain)
+                .text();
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+            delimiter = '~',
+            quoteCharacter = '`',
+            value = {
+                "[{\"text\": \"|{image:a.png}|\"}, \"b\"]~[{\"text\": \"{image:a.png}\", \"underlined\": true}, \"b\"]",
+                "[|{\"text\": \"{image:a.png}|\"}, \"b\"]~[{\"text\": \"{image:a.png}\", \"underlined\": true}, \"b\"]",
+                "[|{\"text\": \"{image:a.png}\"}|, \"b\"]~[{\"text\": \"{image:a.png}\", \"underlined\": true}, \"b\"]",
+                "[{\"text\": \"|Silk| Touch\", \"color\": \"red\"}]~[{\"text\": \"Silk\", \"color\": \"red\", \"underlined\": true}, {\"text\": \" Touch\", \"color\": \"red\"}]"
+            })
+    void wrappingStylesTheSelectedObject(String marked, String expected) {
+        assertEquals(expected, wrap(marked, "\"underlined\": true"));
+    }
+
+    @Test
+    void wrappingAcrossElementsStylesEachOne() {
+        assertEquals(
+                "[{\"text\": \"ab\", \"bold\": true}, {\"text\": \"cd\", \"color\": \"red\", \"bold\": true}]",
+                wrap("[\"a|b\", {\"text\": \"c|d\", \"color\": \"red\"}]", "\"bold\": true"));
+    }
+
+    @Test
+    void wrappingInsideAnObjectLineSplitsIt() {
+        assertEquals(
+                "[ {\"text\": \"a\"}, {\"text\": \"b\", \"bold\": true}, {\"text\": \"c\"} ]",
+                wrap("{\"text\": \"a|b|c\"}", "\"bold\": true"));
+    }
+
+    @Test
+    void replacingInsideAnObjectKeepsItsStyleAround() {
+        assertEquals(
+                "[{\"text\": \"a\", \"color\": \"red\"}, " + KEY + ", {\"text\": \"c\", \"color\": \"red\"}]",
+                insert("[{\"text\": \"a|b|c\", \"color\": \"red\"}]").text());
+    }
+
     @Test
     void selectionAcrossLinesIsKept() {
         assertEquals(
