@@ -19,7 +19,6 @@ import dev.rylex.questaddons.client.DescriptionJsonFixer;
 import dev.rylex.questaddons.client.DescriptionPreview;
 import dev.rylex.questaddons.client.ElementInsertion;
 import dev.rylex.questaddons.client.InsertContext;
-import dev.rylex.questaddons.client.PreviewDivider;
 import dev.rylex.questaddons.client.PreviewLayout;
 import dev.rylex.questaddons.client.PreviewTargets;
 import java.util.List;
@@ -74,9 +73,6 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     private DescriptionPreview questaddons$preview;
 
     @Unique
-    private PreviewDivider questaddons$divider;
-
-    @Unique
     private int questaddons$savedCursor;
 
     @Unique
@@ -90,8 +86,7 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
             return;
         }
         questaddons$preview = new DescriptionPreview(outerPanel, target.quest(), target.viewWidth(), textBox);
-        questaddons$divider =
-                new PreviewDivider(outerPanel, this::questaddons$dragDivider, () -> textBox.setFocused(true));
+        PreviewLayout.resetToSetting();
         hotKeys.put(GLFW.GLFW_KEY_V, this::questaddons$togglePreview);
     }
 
@@ -107,14 +102,13 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
             int top = textBoxPanel.posY;
             int height = textBoxPanel.height;
             int area = questaddons$previewArea();
-            int previewWidth = PreviewLayout.previewWidth(area);
+            int previewWidth = PreviewLayout.previewWidth(questaddons$preview.fixedWidth(), area);
             int textWidth = area - previewWidth;
             textBoxPanel.setPosAndSize(2, top, textWidth, height);
             textBoxPanel.alignWidgets();
             scrollBar.setX(2 + textWidth + 2);
-            int dividerX = 2 + textWidth + SCROLL_ROOM;
-            questaddons$divider.setPosAndSize(dividerX, top, PreviewLayout.DIVIDER, height);
-            questaddons$preview.setPosAndSize(dividerX + PreviewLayout.DIVIDER, top, previewWidth, height);
+            questaddons$preview.setPosAndSize(
+                    2 + textWidth + SCROLL_ROOM + PreviewLayout.GAP, top, previewWidth, height);
         }
         ((PanelAccessor) textBoxPanel).questaddons$setContentHeight(-1);
         textBox.seekCursor(
@@ -135,14 +129,7 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
 
     @Unique
     private int questaddons$previewArea() {
-        return ((Widget) (Object) this).width - 4 - SCROLL_ROOM - PreviewLayout.DIVIDER;
-    }
-
-    @Unique
-    private void questaddons$dragDivider(int mouseX) {
-        int right = outerPanel.getX() + ((Widget) (Object) this).width - 2;
-        PreviewLayout.dragTo(right - mouseX - PreviewLayout.DIVIDER / 2, questaddons$previewArea());
-        ((BaseScreen) (Object) this).alignWidgets();
+        return ((Widget) (Object) this).width - 4 - SCROLL_ROOM - PreviewLayout.GAP;
     }
 
     @Override
@@ -161,7 +148,7 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
 
     @Override
     public List<Widget> questaddons$previewWidgets() {
-        return questaddons$previewShown() ? List.of(questaddons$preview, questaddons$divider) : List.of();
+        return questaddons$previewShown() ? List.of(questaddons$preview) : List.of();
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
