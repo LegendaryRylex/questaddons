@@ -253,12 +253,30 @@ public final class ComponentJsonRepair {
         }
         renamed.entrySet().forEach(entry -> out.add(entry.getKey(), value(entry.getKey(), entry.getValue())));
         if (out.has("text") && isString(out.get("text"))) {
-            LegacyFormatting.split(out.get("text").getAsString()).ifPresent(parts -> moveIntoExtra(out, parts));
+            Optional<List<JsonElement>> parts =
+                    LegacyFormatting.split(out.get("text").getAsString());
+            if (parts.isPresent() && canHoist(out, parts.get())) {
+                return hoist(out, parts.get().getFirst().getAsJsonObject());
+            }
+            parts.ifPresent(list -> moveIntoExtra(out, list));
         }
         if (out.has("extra") && out.getAsJsonArray("extra").isEmpty()) {
             out.remove("extra");
         }
         return out;
+    }
+
+    private static boolean canHoist(JsonObject out, List<JsonElement> parts) {
+        return parts.size() == 1 && parts.getFirst().isJsonObject() && !out.has("extra");
+    }
+
+    private static JsonObject hoist(JsonObject out, JsonObject part) {
+        JsonObject flat = new JsonObject();
+        part.entrySet().forEach(entry -> flat.add(entry.getKey(), entry.getValue()));
+        out.entrySet().stream()
+                .filter(entry -> !flat.has(entry.getKey()))
+                .forEach(entry -> flat.add(entry.getKey(), entry.getValue()));
+        return flat;
     }
 
     private static JsonElement value(String key, JsonElement value) {

@@ -145,6 +145,12 @@ class JsonRepairTest {
                 "{\"text\":\"Hi &cthere\",\"italic\":true}"
                         + "|{\"text\":\"Hi \",\"italic\":true,\"extra\":[{\"text\":\"there\",\"color\":\"red\"}]}",
                 "{\"text\":\"a\",\"extra\":[\"&cred\"]}|{\"text\":\"a\",\"extra\":[{\"text\":\"red\",\"color\":\"red\"}]}",
+                "{\"text\":\"&aStone\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}"
+                        + "|{\"text\":\"Stone\",\"color\":\"green\",\"hover_event\":{\"action\":\"show_item\",\"id\":\"minecraft:stone\",\"count\":1}}",
+                "{\"text\":\"&aStone\",\"color\":\"red\",\"bold\":true}|{\"text\":\"Stone\",\"color\":\"green\",\"bold\":true}",
+                "{\"text\":\"&aStone\",\"extra\":[\"b\"]}|{\"text\":\"\",\"extra\":[{\"text\":\"Stone\",\"color\":\"green\"},\"b\"]}",
+                "{\"text\":\"&aStone &lloud\"}|{\"text\":\"\",\"extra\":[{\"text\":\"Stone \",\"color\":\"green\"},"
+                        + "{\"text\":\"loud\",\"color\":\"green\",\"bold\":true}]}",
                 "[\"R&D & more\"]|[\"R&D & more\"]"
             })
     void convertsFormattingCodes(String line, String expected) {
