@@ -24,8 +24,10 @@ import dev.rylex.questaddons.client.ImageInsertion;
 import dev.rylex.questaddons.client.InsertContext;
 import dev.rylex.questaddons.client.PreviewLayout;
 import dev.rylex.questaddons.client.PreviewTargets;
+import dev.rylex.questaddons.client.ToolbarElements;
 import dev.rylex.questaddons.client.TypedCharGuard;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Whence;
@@ -202,6 +204,34 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
                 (tag, atLineStart, placeholder) -> questaddons$putImage(start, tag, atLineStart, placeholder),
                 () -> textBox.setFocused(true));
         insert.open(questaddons$insertContext);
+    }
+
+    @Inject(method = "doTextInsertion", at = @At("HEAD"), cancellable = true)
+    private void questaddons$insertElement(Consumer<StringBuilder> writer, CallbackInfo ci) {
+        MultilineTextBox.StringExtents selected = textBox.getSelected();
+        String text = textBox.getText();
+        if (ToolbarElements.singleLine(text, selected.start(), selected.end())) {
+            String selection = text.substring(selected.start(), selected.end());
+            StringBuilder element = new StringBuilder();
+            writer.accept(element);
+            ToolbarElements.retext(element.toString(), selection).ifPresent(json -> {
+                questaddons$put(selected.start(), selected.end(), json);
+                ci.cancel();
+            });
+        }
+    }
+
+    @Inject(method = "insertFormatting(Ljava/lang/String;)V", at = @At("HEAD"), cancellable = true)
+    private void questaddons$styleComponentSelection(String formatting, CallbackInfo ci) {
+        MultilineTextBox.StringExtents selected = textBox.getSelected();
+        String text = textBox.getText();
+        if (ToolbarElements.onComponentLine(text, selected.start(), selected.end())) {
+            ToolbarElements.styled(text.substring(selected.start(), selected.end()), formatting)
+                    .ifPresent(element -> {
+                        questaddons$put(selected.start(), selected.end(), element);
+                        ci.cancel();
+                    });
+        }
     }
 
     private void questaddons$put(int start, int end, String element) {
