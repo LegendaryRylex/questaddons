@@ -22,13 +22,12 @@ import dev.rylex.questaddons.client.ImageInsertion;
 import dev.rylex.questaddons.client.InsertContext;
 import dev.rylex.questaddons.client.PreviewLayout;
 import dev.rylex.questaddons.client.PreviewTargets;
+import dev.rylex.questaddons.client.QuestAddonsKeys;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Whence;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,10 +42,6 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     @Shadow
     @Final
     private MultilineTextBox textBox;
-
-    @Shadow
-    @Final
-    private Map<Integer, Runnable> hotKeys;
 
     @Shadow
     @Final
@@ -80,15 +75,13 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     private double questaddons$savedScroll;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void questaddons$registerFixJsonHotkey(CallbackInfo ci) {
-        hotKeys.put(GLFW.GLFW_KEY_F, this::questaddons$fixJson);
+    private void questaddons$createPreview(CallbackInfo ci) {
         PreviewTargets.Target target = PreviewTargets.find(config);
         if (target == null) {
             return;
         }
         questaddons$preview = new DescriptionPreview(outerPanel, target.quest(), target.viewWidth(), textBox);
         PreviewLayout.resetToSetting();
-        hotKeys.put(GLFW.GLFW_KEY_V, this::questaddons$togglePreview);
     }
 
     @Inject(method = "alignWidgets", at = @At("HEAD"))
@@ -153,8 +146,14 @@ public abstract class MultilineTextEditorScreenMixin implements DescriptionEdito
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void questaddons$closePromptOnEscape(Key key, CallbackInfoReturnable<Boolean> cir) {
+    private void questaddons$handleKeys(Key key, CallbackInfoReturnable<Boolean> cir) {
         if (key.esc() && questaddons$insertContext != null && questaddons$insertContext.dismissPrompt()) {
+            cir.setReturnValue(true);
+        } else if (key.matches(QuestAddonsKeys.FIX_JSON)) {
+            questaddons$fixJson();
+            cir.setReturnValue(true);
+        } else if (questaddons$preview != null && key.matches(QuestAddonsKeys.TOGGLE_PREVIEW)) {
+            questaddons$togglePreview();
             cir.setReturnValue(true);
         }
     }
