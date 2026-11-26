@@ -17,7 +17,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
@@ -97,15 +96,11 @@ public enum DescriptionInsert {
     RECIPE("recipe", () -> ItemIcon.getItemIcon(Items.CRAFTING_TABLE), JeiCompat::isLoaded) {
         @Override
         public void open(InsertContext context) {
-            context.menu(JeiCompat.items().stream()
-                    .map(stack -> new ContextMenuItem(
-                            MenuLabel.of(
-                                    stack.getHoverName().getString(),
-                                    BuiltInRegistries.ITEM
-                                            .getKey(stack.getItem())
-                                            .toString()),
-                            ItemIcon.getItemIcon(stack),
-                            button -> context.menu(recipeItems(stack, context))))
+            context.menu(JeiCompat.recipeTargets().stream()
+                    .map(target -> new ContextMenuItem(
+                            MenuLabel.of(target.name().getString(), target.id()),
+                            target.icon(),
+                            button -> context.menu(recipeItems(target, context))))
                     .toList());
         }
     },
@@ -233,8 +228,8 @@ public enum DescriptionInsert {
                 .toList();
     }
 
-    private static List<ContextMenuItem> recipeItems(ItemStack stack, InsertContext context) {
-        List<RecipeLink> links = JeiCompat.recipesMaking(stack);
+    private static List<ContextMenuItem> recipeItems(RecipeTarget target, InsertContext context) {
+        List<RecipeLink> links = JeiCompat.recipesMaking(target);
         if (links.isEmpty()) {
             return List.of(new ContextMenuItem(
                     Component.translatable("questaddons.gui.insert_recipe.none"), Icon.empty(), button -> {}));
@@ -243,11 +238,9 @@ public enum DescriptionInsert {
                 .map(link -> new ContextMenuItem(
                         MenuLabel.of(link.category().getString(), link.recipe(), RECIPE_ID_WIDTH),
                         link.catalyst().isEmpty() ? Icon.empty() : ItemIcon.getItemIcon(link.catalyst()),
-                        button -> context.put(
-                                context.label(stack.getHoverName()).withStyle(style -> style.withUnderlined(true)
-                                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, link.value()))
-                                        .withHoverEvent(
-                                                new HoverEvent(HoverEvent.Action.SHOW_TEXT, link.category()))))))
+                        button -> context.put(context.label(target.name()).withStyle(style -> style.withUnderlined(true)
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, link.value()))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, link.category()))))))
                 .toList();
     }
 

@@ -1,6 +1,7 @@
 package dev.rylex.questaddons.compat.jei;
 
 import dev.rylex.questaddons.client.RecipeLink;
+import dev.rylex.questaddons.client.RecipeTarget;
 import java.util.List;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
@@ -27,12 +28,12 @@ public final class JeiCompat {
         QuestAddonsJeiPlugin.showRecipes(stack, uses);
     }
 
-    public static List<ItemStack> items() {
-        return JeiRecipeLinks.items();
+    public static List<RecipeTarget> recipeTargets() {
+        return JeiRecipeLinks.targets();
     }
 
-    public static List<RecipeLink> recipesMaking(ItemStack stack) {
-        return JeiRecipeLinks.making(stack);
+    public static List<RecipeLink> recipesMaking(RecipeTarget target) {
+        return JeiRecipeLinks.making(target);
     }
 
     public static boolean isRecipeLink(String value) {

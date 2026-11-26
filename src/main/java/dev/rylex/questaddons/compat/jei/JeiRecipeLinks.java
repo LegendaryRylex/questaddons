@@ -1,23 +1,32 @@
 package dev.rylex.questaddons.compat.jei;
 
 import dev.rylex.questaddons.client.RecipeLink;
+import dev.rylex.questaddons.client.RecipeTarget;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusFactory;
 import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidUtil;
 import org.jetbrains.annotations.Nullable;
 
 final class JeiRecipeLinks {
@@ -26,30 +35,36 @@ final class JeiRecipeLinks {
     private static final String RECIPE = "recipe";
     private static final String OUTPUT = "output";
     private static final String INPUT = "input";
+    private static final String OUTPUT_FLUID = "output_fluid";
+    private static final String INPUT_FLUID = "input_fluid";
 
     private JeiRecipeLinks() {}
 
-    static List<ItemStack> items() {
+    static List<RecipeTarget> targets() {
         IJeiRuntime runtime = QuestAddonsJeiPlugin.runtime();
-        return runtime == null
-                ? List.of()
-                : List.copyOf(runtime.getIngredientManager().getAllItemStacks());
+        if (runtime == null) {
+            return List.of();
+        }
+        IIngredientManager ingredients = runtime.getIngredientManager();
+        return Stream.concat(
+                        ingredients.getAllItemStacks().stream().map(RecipeTarget::item),
+                        ingredients.getAllIngredients(NeoForgeTypes.FLUID_STACK).stream()
+                                .map(RecipeTarget::fluid))
+                .toList();
     }
 
-    static List<RecipeLink> making(ItemStack stack) {
+    static List<RecipeLink> making(RecipeTarget target) {
         IJeiRuntime runtime = QuestAddonsJeiPlugin.runtime();
         if (runtime == null) {
             return List.of();
         }
         IRecipeManager recipes = runtime.getRecipeManager();
-        IFocus<ItemStack> focus = runtime.getJeiHelpers()
-                .getFocusFactory()
-                .createFocus(RecipeIngredientRole.OUTPUT, VanillaTypes.ITEM_STACK, stack);
+        List<IFocus<?>> focuses = focuses(runtime, RecipeIngredientRole.OUTPUT, target);
         List<RecipeLink> links = new ArrayList<>();
         recipes.createRecipeCategoryLookup()
-                .limitFocus(List.of(focus))
+                .limitFocus(focuses)
                 .get()
-                .forEach(category -> addLinks(recipes, category, focus, stack, links));
+                .forEach(category -> addLinks(recipes, category, focuses, target, links));
         links.sort(RecipeLink.ORDER);
         return links;
     }
@@ -57,8 +72,8 @@ final class JeiRecipeLinks {
     private static <T> void addLinks(
             IRecipeManager recipes,
             IRecipeCategory<T> category,
-            IFocus<ItemStack> focus,
-            ItemStack stack,
+            List<IFocus<?>> focuses,
+            RecipeTarget target,
             List<RecipeLink> links) {
         RecipeType<T> type = category.getRecipeType();
         ItemStack catalyst = recipes.createRecipeCatalystLookup(type)
@@ -67,10 +82,8 @@ final class JeiRecipeLinks {
                 .orElse(ItemStack.EMPTY);
         String base = SCHEME + type.getUid();
         boolean unnamed = false;
-        for (T recipe : recipes.createRecipeLookup(type)
-                .limitFocus(List.of(focus))
-                .get()
-                .toList()) {
+        for (T recipe :
+                recipes.createRecipeLookup(type).limitFocus(focuses).get().toList()) {
             ResourceLocation name = category.getRegistryName(recipe);
             if (name == null) {
                 unnamed = true;
@@ -80,9 +93,23 @@ final class JeiRecipeLinks {
             }
         }
         if (unnamed) {
-            String item = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-            links.add(new RecipeLink(base + "?" + OUTPUT + "=" + item, category.getTitle(), item, catalyst));
+            String key = target.isFluid() ? OUTPUT_FLUID : OUTPUT;
+            links.add(new RecipeLink(base + "?" + key + "=" + target.id(), category.getTitle(), target.id(), catalyst));
         }
+    }
+
+    private static List<IFocus<?>> focuses(IJeiRuntime runtime, RecipeIngredientRole role, RecipeTarget target) {
+        IFocusFactory factory = runtime.getJeiHelpers().getFocusFactory();
+        List<IFocus<?>> focuses = new ArrayList<>();
+        FluidStack fluid = target.fluid();
+        if (!target.isFluid()) {
+            focuses.add(factory.createFocus(role, VanillaTypes.ITEM_STACK, target.stack()));
+            fluid = FluidUtil.getFluidContained(target.stack()).orElse(FluidStack.EMPTY);
+        }
+        if (!fluid.isEmpty()) {
+            focuses.add(factory.createFocus(role, NeoForgeTypes.FLUID_STACK, fluid));
+        }
+        return focuses;
     }
 
     static boolean open(String value) {
@@ -120,34 +147,39 @@ final class JeiRecipeLinks {
                 return;
             }
         }
-        IFocus<?> focus = focus(runtime, params);
-        if (focus != null) {
-            List<T> matching = recipes.createRecipeLookup(type)
-                    .limitFocus(List.of(focus))
-                    .get()
-                    .toList();
+        List<IFocus<?>> focuses = focuses(runtime, params);
+        if (!focuses.isEmpty()) {
+            List<T> matching =
+                    recipes.createRecipeLookup(type).limitFocus(focuses).get().toList();
             if (!matching.isEmpty()) {
-                runtime.getRecipesGui().showRecipes(category, matching, List.of(focus));
+                runtime.getRecipesGui().showRecipes(category, matching, focuses);
                 return;
             }
         }
         runtime.getRecipesGui().showTypes(List.of(type));
     }
 
-    private static @Nullable IFocus<?> focus(IJeiRuntime runtime, Map<String, String> params) {
-        boolean output = params.containsKey(OUTPUT);
-        ResourceLocation itemId = id(output ? params.get(OUTPUT) : params.get(INPUT));
-        if (itemId == null) {
-            return null;
-        }
-        Optional<Item> item = BuiltInRegistries.ITEM.getOptional(itemId);
-        if (item.isEmpty()) {
-            return null;
-        }
+    private static List<IFocus<?>> focuses(IJeiRuntime runtime, Map<String, String> params) {
+        boolean output = params.containsKey(OUTPUT) || params.containsKey(OUTPUT_FLUID);
         RecipeIngredientRole role = output ? RecipeIngredientRole.OUTPUT : RecipeIngredientRole.INPUT;
-        return runtime.getJeiHelpers()
-                .getFocusFactory()
-                .createFocus(role, VanillaTypes.ITEM_STACK, new ItemStack(item.get()));
+        RecipeTarget target = target(params, output ? OUTPUT : INPUT, output ? OUTPUT_FLUID : INPUT_FLUID);
+        return target == null ? List.of() : focuses(runtime, role, target);
+    }
+
+    private static @Nullable RecipeTarget target(Map<String, String> params, String itemKey, String fluidKey) {
+        ResourceLocation itemId = id(params.get(itemKey));
+        if (itemId != null) {
+            return BuiltInRegistries.ITEM
+                    .getOptional(itemId)
+                    .map(item -> RecipeTarget.item(new ItemStack(item)))
+                    .orElse(null);
+        }
+        ResourceLocation fluidId = id(params.get(fluidKey));
+        if (fluidId == null) {
+            return null;
+        }
+        Fluid fluid = BuiltInRegistries.FLUID.getOptional(fluidId).orElse(Fluids.EMPTY);
+        return fluid == Fluids.EMPTY ? null : RecipeTarget.fluid(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
     }
 
     private static Map<String, String> params(String query) {
