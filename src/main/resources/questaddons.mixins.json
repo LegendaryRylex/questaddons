@@ -22,7 +22,6 @@
     "QuestScreenArrowMoveMixin",
     "QuestScreenFilterMixin",
     "QuestScreenMixin",
-    "QuestScreenSaveMixin",
     "QuestScreenSelectionMixin",
     "QuestScreenSplitMixin",
     "ScreenWrapperSplitMixin",
