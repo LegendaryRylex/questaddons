@@ -36,6 +36,9 @@ public interface QuestScreenAccessor {
     @Invoker("selectAllQuestsInBox")
     void questaddons$selectAllQuestsInBox(int mouseX, int mouseY, double scrollX, double scrollY);
 
+    @Invoker("openQuestSelectionGUI")
+    void questaddons$openQuestSelectionGUI();
+
     @Accessor("chapterPanel")
     ChapterPanel questaddons$chapterPanel();
 }
