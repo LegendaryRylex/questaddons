@@ -28,6 +28,7 @@ All unbound by default. Set them in Controls under "Quest Addons". Editing keybi
 - Quest search with an empty box lists your recent picks and the open chapter's quests first. The arrow keys move through the results and Enter opens the highlighted one.
 - With quests selected and no quest open, the arrow keys move the selection without picking it up first.
 - Right-clicking a selected quest offers Change Shape for all, which sets one shape on every selected quest.
+- Clicking a quest in the Claim Rewards list opens it in the quest book.
 
 ## Description editor
 
