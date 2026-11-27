@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = OtherButtonsPanelTop.class, remap = false)
 public abstract class OtherButtonsPanelTopMixin {
-    @Inject(method = "addWidgets", at = @At("TAIL"))
+    @Inject(method = "addWidgets", at = @At("HEAD"))
     private void questaddons$addSearchButton(CallbackInfo ci) {
         Panel panel = (Panel) (Object) this;
         panel.add(new SearchTabButton(panel));
