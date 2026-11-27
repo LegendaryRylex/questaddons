@@ -24,6 +24,8 @@ All unbound by default. Set them in Controls under "Quest Addons". Editing keybi
 - Numpad Enter works wherever Enter does.
 - A Search Quests button in the quest book's side buttons opens the quest search, alongside its keybind.
 - The quest object picker also searches quest descriptions and subtitles, matching every word you type in any order.
+- Quest search opens in a wider window, with a second line under each result showing its chapter and the part of the description that matched, with your words highlighted. Title matches come before description matches, and a result count sits beside the title. It also finds a quest by its ID, with or without the leading `#`.
+- Quest search with an empty box lists your recent picks and the open chapter's quests first. The arrow keys move through the results and Enter opens the highlighted one.
 - With quests selected and no quest open, the arrow keys move the selection without picking it up first.
 - Right-clicking a selected quest offers Change Shape for all, which sets one shape on every selected quest.
 
