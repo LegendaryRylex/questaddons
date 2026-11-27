@@ -18,7 +18,7 @@
   "key.questaddons.insert_guideme": "Insert GuideMe Link",
   "key.questaddons.insert_patchouli": "Insert Patchouli Link",
   "questaddons.gui.search": "Search Quests",
-  "questaddons.gui.change_shape_all":"Change Shape for all: %s",
+  "questaddons.gui.change_shape_all": "Change Shape for all: %s",
   "questaddons.gui.fix_json": "JSON Fixer",
   "questaddons.gui.fix_json.tooltip": "Repairs every broken JSON text line in this description",
   "questaddons.gui.hotkey": "[%s]",
