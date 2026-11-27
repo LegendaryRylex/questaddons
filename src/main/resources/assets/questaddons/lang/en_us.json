@@ -22,7 +22,7 @@
   "questaddons.gui.expand": "Expand",
   "questaddons.gui.expand.tooltip": "Shows the subtitle and description again",
   "questaddons.gui.search": "Search Quests",
-  "questaddons.gui.change_shape_all":"Change Shape for all: %s",
+  "questaddons.gui.change_shape_all": "Change Shape for all: %s",
   "questaddons.gui.fix_json": "JSON Fixer",
   "questaddons.gui.fix_json.tooltip": "Repairs every broken JSON text line in this description",
   "questaddons.gui.hotkey": "[%s]",
