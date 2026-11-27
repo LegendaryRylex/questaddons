@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public final class JeiCompat {
     public static final String MOD_ID = "jei";
@@ -26,6 +27,14 @@ public final class JeiCompat {
 
     public static void showRecipes(ItemStack stack, boolean uses) {
         QuestAddonsJeiPlugin.showRecipes(stack, uses);
+    }
+
+    public static List<ItemStack> visibleItems() {
+        return JeiIngredients.items();
+    }
+
+    public static List<FluidStack> visibleFluids() {
+        return JeiIngredients.fluids();
     }
 
     public static List<RecipeTarget> recipeTargets() {
