@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,14 +28,17 @@ public final class QuestSearchIndex {
     private final Map<Long, Integer> docs;
     private final TextIndex shown;
     private final TextIndex details;
+    private final String[][] lines;
     private @Nullable String lastQuery;
     private BitSet lastMatches = new BitSet();
+    private BitSet lastShown = new BitSet();
 
     private QuestSearchIndex(ClientQuestFile file) {
         this.file = file;
         this.objects = new ArrayList<>(file.getAllObjects());
         this.fingerprints = new ArrayList<>(objects.size());
         this.docs = new HashMap<>(objects.size() * 2);
+        this.lines = new String[objects.size()][];
         TextIndex.Builder shownBuilder = new TextIndex.Builder().reserve(objects.size());
         TextIndex.Builder detailsBuilder = new TextIndex.Builder().reserve(objects.size());
         for (int doc = 0; doc < objects.size(); doc++) {
@@ -45,9 +50,16 @@ public final class QuestSearchIndex {
             switch (object) {
                 case Quest quest -> {
                     shownBuilder.add(doc, quest.getSubtitle().getString());
+                    List<String> text = new ArrayList<>();
                     for (Component line : quest.getDescription()) {
-                        detailsBuilder.add(doc, line.getString());
+                        String plain = line.getString();
+                        detailsBuilder.add(doc, plain);
+                        String stripped = ChatFormatting.stripFormatting(plain).strip();
+                        if (!stripped.isEmpty() && !stripped.startsWith("{")) {
+                            text.add(stripped);
+                        }
                     }
+                    lines[doc] = text.toArray(String[]::new);
                 }
                 case Chapter chapter -> {
                     for (String line : chapter.getRawSubtitle()) {
@@ -65,9 +77,49 @@ public final class QuestSearchIndex {
     }
 
     public static boolean matches(QuestObjectBase object, String query, Object screen) {
+        QuestSearchIndex index = indexFor(query, screen);
+        if (index == null) {
+            return false;
+        }
+        Integer doc = index.docs.get(object.id);
+        return doc != null && index.matchesFor(query).get(doc);
+    }
+
+    public static boolean matchesShownText(QuestObjectBase object, String query, Object screen) {
+        QuestSearchIndex index = indexFor(query, screen);
+        if (index == null) {
+            return false;
+        }
+        Integer doc = index.docs.get(object.id);
+        if (doc == null) {
+            return false;
+        }
+        index.matchesFor(query);
+        return index.lastShown.get(doc);
+    }
+
+    public static Optional<String> matchingLine(QuestObjectBase object, String query, Object screen) {
+        QuestSearchIndex index = indexFor(query, screen);
+        if (index == null || !(object instanceof Quest quest)) {
+            return Optional.empty();
+        }
+        Integer doc = index.docs.get(object.id);
+        if (doc == null || index.lines[doc] == null || !index.file.canEdit() && !index.descriptionVisible(quest)) {
+            return Optional.empty();
+        }
+        List<String> terms = TextIndex.tokens(query);
+        for (String line : index.lines[doc]) {
+            if (SearchSnippet.firstHit(line, terms) >= 0) {
+                return Optional.of(line);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static @Nullable QuestSearchIndex indexFor(String query, Object screen) {
         ClientQuestFile file = ClientQuestFile.INSTANCE;
         if (file == null || query.strip().length() < MIN_QUERY_LENGTH) {
-            return false;
+            return null;
         }
         QuestSearchIndex index = current;
         if (index == null || index.file != file || checkedFor != screen && index.isStale()) {
@@ -75,14 +127,15 @@ public final class QuestSearchIndex {
             current = index;
         }
         checkedFor = screen;
-        Integer doc = index.docs.get(object.id);
-        return doc != null && index.matchesFor(query).get(doc);
+        return index;
     }
 
     private BitSet matchesFor(String query) {
         if (!query.equals(lastQuery)) {
             lastQuery = query;
-            lastMatches = evaluate(TextIndex.tokens(query));
+            List<String> terms = TextIndex.tokens(query);
+            lastShown = terms.isEmpty() ? new BitSet() : shown.matchAll(terms);
+            lastMatches = evaluate(terms);
         }
         return lastMatches;
     }

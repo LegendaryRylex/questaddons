@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "BaseScreenQuestWindowsMixin",
+    "ButtonListScreenAccessor",
     "ButtonListSearchMixin",
     "ChapterButtonMixin",
     "ChapterGroupButtonMixin",
