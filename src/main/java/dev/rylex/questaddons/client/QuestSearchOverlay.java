@@ -7,7 +7,6 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.PanelScrollBar;
 import dev.ftb.mods.ftblibrary.ui.TextBox;
 import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.KeyModifiers;
@@ -253,7 +252,7 @@ public class QuestSearchOverlay extends ModalPanel {
         }
         found.sort(DEFAULT_ORDER);
         if (query.isEmpty()) {
-            addBrowseSections(panel, found);
+            addBrowseList(panel, found);
             selected = -1;
         } else {
             found.removeIf(object -> !matches(object));
@@ -276,43 +275,30 @@ public class QuestSearchOverlay extends ModalPanel {
                 || QuestSearchIndex.matchesShownText(object, query, this);
     }
 
-    private void addBrowseSections(Panel panel, List<QuestObjectBase> found) {
+    private void addBrowseList(Panel panel, List<QuestObjectBase> found) {
         Map<Long, QuestObjectBase> byId = new HashMap<>();
         found.forEach(object -> byId.put(object.id, object));
         Set<Long> used = new HashSet<>();
-        addSection(
-                panel,
-                "recent",
-                RECENT.stream().map(byId::get).filter(Objects::nonNull).toList(),
-                used);
+        addUnused(panel, RECENT.stream().map(byId::get).filter(Objects::nonNull).toList(), used);
         screen.getSelectedChapter()
-                .ifPresent(chapter -> addSection(
+                .ifPresent(chapter -> addUnused(
                         panel,
-                        "this_chapter",
                         found.stream()
                                 .filter(object -> chapterOf(object) == chapter)
                                 .toList(),
                         used));
-        addSection(
+        addUnused(
                 panel,
-                "chapters",
                 found.stream().filter(object -> object instanceof Chapter).toList(),
                 used);
-        addSection(panel, "other", found, used);
+        addUnused(panel, found, used);
     }
 
-    private void addSection(Panel panel, String key, List<QuestObjectBase> objects, Set<Long> used) {
-        List<QuestObjectBase> fresh =
-                objects.stream().filter(object -> !used.contains(object.id)).toList();
-        if (fresh.isEmpty()) {
-            return;
-        }
-        panel.add(new SectionLabel(
-                panel,
-                Component.translatable("questaddons.gui.search.section." + key).withStyle(ChatFormatting.GRAY)));
-        for (QuestObjectBase object : fresh) {
-            used.add(object.id);
-            addRow(panel, object);
+    private void addUnused(Panel panel, List<QuestObjectBase> objects, Set<Long> used) {
+        for (QuestObjectBase object : objects) {
+            if (used.add(object.id)) {
+                addRow(panel, object);
+            }
         }
     }
 
@@ -407,21 +393,6 @@ public class QuestSearchOverlay extends ModalPanel {
         public void alignWidgets() {
             widgets.forEach(widget -> widget.setWidth(width));
             align(WidgetLayout.VERTICAL);
-        }
-    }
-
-    private static class SectionLabel extends Widget {
-        private final Component label;
-
-        SectionLabel(Panel panel, Component label) {
-            super(panel);
-            this.label = label;
-            setHeight(14);
-        }
-
-        @Override
-        public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-            theme.drawString(graphics, label, x + 3, y + h - theme.getFontHeight() - 1, LABEL, Theme.SHADOW);
         }
     }
 
