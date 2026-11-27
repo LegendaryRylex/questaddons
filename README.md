@@ -26,6 +26,7 @@ All unbound by default. Set them in Controls under "Quest Addons". Editing keybi
 - The quest object picker also searches by ID, with or without the leading `#`, and by quest descriptions and subtitles, matching every word you type in any order.
 - Quest search opens in a wider window, with a second line under each result showing its chapter and the part of the description that matched, with your words highlighted. Title matches come before description matches, and a result count sits beside the title.
 - Quest search with an empty box lists your recent picks and the open chapter's quests first. The arrow keys move through the results and Enter opens the highlighted one.
+- Clicking an item task for a fluid bucket opens the recipes that make the fluid instead of the bucket's.
 - Right-clicking a selected quest offers Change Shape for all, which sets one shape on every selected quest.
 
 ## Description editor

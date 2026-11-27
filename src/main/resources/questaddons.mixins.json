@@ -13,6 +13,7 @@
     "ChapterPanelAccessor",
     "ChapterPanelMixin",
     "ExpandChaptersButtonMixin",
+    "ItemTaskMixin",
     "KeyMixin",
     "MultilineTextEditorOuterPanelMixin",
     "MultilineTextEditorScreenMixin",
