@@ -37,7 +37,7 @@
   "questaddons.gui.insert_hover_text.prompt": "Tooltip text",
   "questaddons.gui.insert_item": "Insert Item or Fluid",
   "questaddons.gui.insert_item.tooltip": "Picks an item or fluid and adds its name at the cursor, showing its tooltip on hover",
-  "questaddons.gui.search_mode.items_and_fluids": "Items and Fluids",
+  "questaddons.gui.search_mode.jei": "JEI",
   "questaddons.gui.insert_command": "Insert Command Link",
   "questaddons.gui.insert_command.tooltip": "Adds a link that runs a command when clicked, wrapping the selection if there is one",
   "questaddons.gui.insert_command.prompt": "Command",

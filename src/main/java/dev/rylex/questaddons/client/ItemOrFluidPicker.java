@@ -16,6 +16,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.ModUtils;
 import dev.ftb.mods.ftblibrary.util.SearchTerms;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.rylex.questaddons.compat.jei.JeiCompat;
 import java.util.Collection;
 import java.util.OptionalLong;
 import java.util.function.Supplier;
@@ -38,19 +39,19 @@ public final class ItemOrFluidPicker extends ResourceSelectorScreen<Object> {
     private static final SearchModeIndex<ResourceSearchMode<Object>> MODES = new SearchModeIndex<>();
 
     static {
-        MODES.appendMode(new Mode(
-                ItemIcon.getItemIcon(Items.WATER_BUCKET),
-                Component.translatable("questaddons.gui.search_mode.items_and_fluids"),
-                () -> Stream.concat(
-                                ResourceSearchMode.ALL_ITEMS.getAllResources().stream(),
-                                ResourceSearchMode.ALL_FLUIDS.getAllResources().stream())
-                        .toList(),
-                () -> {
-                    ResourceSearchMode.ALL_ITEMS.clearCache();
-                    ResourceSearchMode.ALL_FLUIDS.clearCache();
-                }));
+        if (JeiCompat.isLoaded()) {
+            MODES.appendMode(new Mode(
+                    ItemIcon.getItemIcon(Items.APPLE),
+                    Component.translatable("questaddons.gui.search_mode.jei"),
+                    ItemOrFluidPicker::jeiResources,
+                    () -> {}));
+        }
         MODES.appendMode(wrap(ResourceSearchMode.ALL_ITEMS));
-        MODES.appendMode(wrap(ResourceSearchMode.ALL_FLUIDS));
+        MODES.appendMode(new Mode(
+                ItemIcon.getItemIcon(Items.BUCKET),
+                ResourceSearchMode.ALL_FLUIDS.getDisplayName(),
+                ResourceSearchMode.ALL_FLUIDS::getAllResources,
+                ResourceSearchMode.ALL_FLUIDS::clearCache));
         MODES.appendMode(wrap(ResourceSearchMode.INVENTORY));
     }
 
@@ -70,6 +71,15 @@ public final class ItemOrFluidPicker extends ResourceSelectorScreen<Object> {
     @Override
     protected ResourceButton makeResourceButton(Panel panel, @Nullable SelectableResource<Object> resource) {
         return new PickButton(panel, resource == null ? resource(ItemStack.EMPTY) : resource);
+    }
+
+    private static Collection<? extends SelectableResource<?>> jeiResources() {
+        return Stream.<SelectableResource<?>>concat(
+                        JeiCompat.visibleItems().stream().map(SelectableResource::item),
+                        JeiCompat.visibleFluids().stream()
+                                .map(fluid -> SelectableResource.fluid(FluidStack.create(
+                                        fluid.getFluid(), FluidType.BUCKET_VOLUME, fluid.getComponentsPatch()))))
+                .toList();
     }
 
     private static Mode wrap(ResourceSearchMode<?> mode) {

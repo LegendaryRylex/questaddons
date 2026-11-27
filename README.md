@@ -32,7 +32,7 @@ All unbound by default. Set them in Controls under "Quest Addons". Editing keybi
 - **Insert buttons** add a text element as JSON at the cursor. A plain text line becomes JSON with its colours kept. Links and tooltips wrap the selection, also inside a JSON element's text, where only the selected part takes the new style. The buttons move to a second row when the window is narrow.
   - Keybind: a searchable list of every keybind, bound or not. Each player sees their own key in yellow, with the default on hover.
   - Hover Text: wraps the selection in a tooltip.
-  - Item or Fluid: pick either from one list, with Items and Fluids, Items, Fluids and Inventory search modes. Adds its name with its tooltip. In the quest book the tooltip shows its icon, and clicking opens its recipes in JEI, REI or EMI (needs FTB XMod Compat).
+  - Item or Fluid: pick either from one list, with JEI, Items, Fluids and Inventory search modes. The JEI mode lists only what JEI shows, so hidden and removed items stay out of the search. Adds its name with its tooltip. In the quest book the tooltip shows its icon, and clicking opens its recipes in JEI, REI or EMI (needs FTB XMod Compat).
   - Command Link and Copy Link: a link that runs a command or copies text.
   - Font: any loaded font, from a list that previews each one.
   - Recipe Link (JEI): pick an item or fluid, then one recipe that makes it, shown with its machine's icon and recipe ID. A bucket also lists the recipes that make its fluid. Adds the name as a link to that recipe, with the recipe type on hover.

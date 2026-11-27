@@ -33,11 +33,13 @@ public final class QuestAddonsJeiPlugin implements IModPlugin {
     @Override
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
         runtime = jeiRuntime;
+        JeiIngredients.attach(jeiRuntime);
     }
 
     @Override
     public void onRuntimeUnavailable() {
         runtime = null;
+        JeiIngredients.clear();
     }
 
     static @Nullable IJeiRuntime runtime() {
