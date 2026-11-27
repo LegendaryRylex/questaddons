@@ -68,6 +68,8 @@ public class QuestSearchOverlay extends ModalPanel {
     private final PanelScrollBar scrollBar;
     private final List<ResultRow> rows = new ArrayList<>();
     private int selected = -1;
+    private int laidOutWidth;
+    private int laidOutHeight;
 
     private QuestSearchOverlay(QuestScreen screen) {
         super(screen);
@@ -130,6 +132,8 @@ public class QuestSearchOverlay extends ModalPanel {
     }
 
     private void layout() {
+        laidOutWidth = screen.width;
+        laidOutHeight = screen.height;
         int barRight = QuestSearchBar.right(screen);
         int fieldWidth = QuestSearchBar.fieldWidth(screen);
         int barHeight = QuestSearchBar.HEIGHT;
@@ -155,6 +159,14 @@ public class QuestSearchOverlay extends ModalPanel {
     @Override
     public void alignWidgets() {
         layout();
+    }
+
+    @Override
+    public void updateMouseOver(int mouseX, int mouseY) {
+        if (screen.width != laidOutWidth || screen.height != laidOutHeight) {
+            layout();
+        }
+        super.updateMouseOver(mouseX, mouseY);
     }
 
     @Override
